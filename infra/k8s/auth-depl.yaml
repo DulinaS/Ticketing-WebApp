@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-depl
+spec:
+  replicas: 1
+  selector:
+    #Finds the pod with the label app: auth
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: dulina786/auth
+
+---
+#Create a service for the auth-depl
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-srv
+spec:
+  #Find the pod with the label app: auth
+  selector:
+    app: auth
+  type: CluterIP #What this does is that it creates a service that is only accessible from within the cluster
+  ports:
+    - name: auth
+      port: 3000
+      targetPort: 3000
