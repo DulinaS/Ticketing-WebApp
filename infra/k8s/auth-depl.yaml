@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: dulina786/auth
+          image: us.gcr.io/ticketing-dev-460619/auth
 
 ---
 #Create a service for the auth-depl
