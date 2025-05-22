@@ -5,7 +5,7 @@ import express from "express";
 const router = express.Router();
 
 router.get("/api/users/currentuser", (req, res) => {
-  //req.currentUser is set in the auth middleware
+  res.send("Current user");
   
 });
 
