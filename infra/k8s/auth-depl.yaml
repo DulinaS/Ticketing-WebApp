@@ -27,7 +27,7 @@ spec:
   #Find the pod with the label app: auth
   selector:
     app: auth
-  type: CluterIP #What this does is that it creates a service that is only accessible from within the cluster
+  type: ClusterIP #What this does is that it creates a service that is only accessible from within the cluster
   ports:
     - name: auth
       port: 3000

@@ -1,0 +1,18 @@
+apiVersion: skaffold/v4beta3
+kind: Config
+manifests:
+  rawYaml:
+    #By adding this we're telling skaffold to watch for changes in the k8s folder and deploy them
+    - ./infra/k8s/*
+build:
+  local:
+    push: false #This is set to false because we don't want to push the image to docker Hub when we build it
+  artifacts:
+    - image: dulina786/auth
+      context: auth #This is the folder where the Dockerfile is located
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts' #if we make a change to ts file in auth folder skaffold will directly copy it to POD
+            dest: .
