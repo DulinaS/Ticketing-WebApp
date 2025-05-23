@@ -17,11 +17,13 @@ router.post(
 
     //If there are errors, we send a 400 response with the errors
     if (!errors.isEmpty()) {
-      return res.status(400).send(errors.array());
+      //This will be picked up by the error handler middleware
+      throw new Error('Invalid Email or Password'); //We throw an error if there are errors
     }
 
     const { email, password } = req.body; //We get the email and password from the request body
     console.log('Creating a user...');
+    throw new Error('Error connecting to the database'); //We throw an error if there is an error connecting to the database
 
     res.send({});
   }
