@@ -1,6 +1,7 @@
 import express from 'express';
 import 'express-async-errors'; //This is a middleware that will handle async errors in the application
 import { json } from 'body-parser';
+import mongoose from 'mongoose';
 
 //This is a named import, so we can import it in the index.ts file
 import { currentUserRouter } from './routes/current-user';
@@ -30,6 +31,21 @@ app.all('*', async (req, res) => {
 app.use(errorHandler);
 //This is a middleware that will handle any errors that occur in the application
 
-app.listen(3000, () => {
-  console.log('Auth service listening on port 3000!!!');
-});
+//This is the function that will start the application and connect to the MongoDB database
+//We are using mongoose to connect to the MongoDB database
+const start = async () => {
+  //auth-mongo-srv is the name of the service
+  //We are using the service name to connect to the MongoDB database
+  try {
+    await mongoose.connect('mongodb://auth-mongo-srv:27017/auth');
+    console.log('Connected to MongoDB');
+  } catch (err) {
+    console.error(err);
+  }
+
+  app.listen(3000, () => {
+    console.log('Auth service listening on port 3000!!!');
+  });
+};
+//This is the function that will start the application
+start();
