@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: auth-mongo-depl
 spec:
-  replias: 1 #This tells the k8s to run 1 replica of this deployment
+  replicas: 1 #This tells the k8s to run 1 replica of this deployment
   selector:
     matchLabels:
       app: auth-mongo #label that is going to used to match the pods
@@ -19,6 +19,7 @@ spec:
 ---
 #ClusterIP service for the auth-mongo deployment
 apiVersion: v1
+kind: Service
 metadata:
   name: auth-mongo-srv
 spec:
