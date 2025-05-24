@@ -19,6 +19,7 @@ export class RequestValidationError extends Error {
           field: error.path,
         };
       }
+      return { message: error.msg };
     });
   }
 }

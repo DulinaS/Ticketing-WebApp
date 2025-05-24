@@ -1,16 +1,18 @@
+//Any time user goes to a route that doesn't exist, we want to return this error
 import { CustomError } from './custom-error';
 
-export class DatabaseConnectionError extends CustomError {
-  statusCode = 500;
+export class NotFoundError extends CustomError {
+  statusCode = 404;
   //This is the status code that will be sent in the response
-  reason = 'Error connecting to the database';
+  reason = 'Route not found';
   //This is the reason that will be sent in the response
 
   constructor() {
+    //Why we are calling super here? Because we are extending a built in class
     super();
 
     //Only because we are extending a built in class
-    Object.setPrototypeOf(this, DatabaseConnectionError.prototype);
+    Object.setPrototypeOf(this, NotFoundError.prototype);
   }
 
   serializeErrors() {
