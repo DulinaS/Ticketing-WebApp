@@ -11,13 +11,21 @@ export const errorHandler = (
 ) => {
   //Check the type of error
   if (err instanceof RequestValidationError) {
-    console.log('Handling Request Validation Error...');
+    const formattedErrors = err.errors.map((error) => {
+      if (error.type === 'field') {
+        return {
+          message: error.msg,
+          field: error.path,
+        };
+      }
+    });
+    return res.status(400).send({ errors: formattedErrors });
   }
   if (err instanceof DatabaseConnectionError) {
-    console.log('Handling Database Connection Error...');
+    return res.status(500).send({ errors: [{ message: err.reason }] });
   }
 
   res.status(400).send({
-    message: err.message,
+    errors: [{ message: 'Something went wrong' }],
   });
 };
