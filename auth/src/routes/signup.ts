@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
+import { User } from '../models/user';
 import { RequestValidationError } from '../errors/request-validation-error';
-import { DatabaseConnectionError } from '../errors/database-connection-error';
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.post(
       .isLength({ min: 4, max: 20 })
       .withMessage('Password must be between 4 and 20 characters'),
   ],
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req); //We use the validationResult function to get the errors from the request
 
     //If there are errors, we send a 400 response with the errors
@@ -23,10 +23,26 @@ router.post(
       throw new RequestValidationError(errors.array()); //We throw an error if there are errors
     }
 
-    console.log('Creating a user...');
-    throw new DatabaseConnectionError(); //We throw an error if there are error
+    //After validation, we can create a new user
+    //Before creating a user, we should check if the user already exists
+    const { email, password } = req.body;
+    const exisitingUser = await User.findOne({ email });
 
-    res.send({});
+    if (exisitingUser) {
+      console.log('User already exists');
+      return res.send({});
+    }
+
+    //If the user does not exist, Hash the password
+
+    // Create a new user instance
+    const user = User.build({ email, password });
+    // Save the user to the database
+    await user.save();
+
+    // Respond with the user data
+
+    res.status(201).send(user); //201 is the status code for created
   }
 );
 
