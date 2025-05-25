@@ -31,5 +31,5 @@ const buildUser = (attrs: UserAttrs) => {
   return new User(attrs); //This will create a new User instance with the attributes we passed in
 };
 
-export { User };
+export { User, buildUser };
 //We are exporting the User model so we can use it in other files
