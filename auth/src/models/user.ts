@@ -7,6 +7,11 @@ interface UserAttrs {
   password: string; //This is a string that represents the password of the user
 }
 
+// An interface that describes the properties that a User model has
+interface UserModel extends mongoose.Model<any> {
+  build(attrs: UserAttrs): any; //This is a method that will create a new User instance with the attributes we passed in
+}
+
 //schema is a blueprint for the data
 const userSchema = new mongoose.Schema({
   email: {
@@ -20,16 +25,15 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-//This is a mongoose model, which is a class that represents a collection in the database
-const User = mongoose.model('User', userSchema);
-//We are creating a User model using the userSchema we defined above
-
-//This is a function that will create a new User instance with the attributes we passed in
-//It takes an object of type UserAttrs as an argument
-//This function is used to create a new User instance
-const buildUser = (attrs: UserAttrs) => {
+//userSchema.statics is a way to define static methods on the schema
+//Static methods are methods that can be called on the model itself, rather than on an instance of the model
+userSchema.statics.build = (attrs: UserAttrs) => {
   return new User(attrs); //This will create a new User instance with the attributes we passed in
 };
 
-export { User, buildUser };
-//We are exporting the User model so we can use it in other files
+//This is a mongoose model, which is a class that represents a collection in the database
+const User = mongoose.model<any, UserModel>('User', userSchema);
+//We are creating a User model using the userSchema we defined above
+
+export { User };
+//We are exporting the User model and the buildUser function so that we can use them in other files
