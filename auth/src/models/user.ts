@@ -1,5 +1,6 @@
 //Define mongoose user model
 import mongoose from 'mongoose';
+import { Password } from '../services/password'; //Importing the Password service to hash the password
 
 // An interface that describes the properties that are required to create a new User
 interface UserAttrs {
@@ -29,6 +30,20 @@ const userSchema = new mongoose.Schema({
     type: String, //In mongoose, String is a type that represents a string value
     required: true,
   },
+});
+
+//This is a pre-save hook that will run before the user is saved to the database
+//What we do is we hash the password before saving the user to the database
+userSchema.pre('save', async function (done) {
+  //Modified means we are checking if the password field has been modified
+  //If the password field has not been modified, we will not hash it
+  //Even if we are creating a new user, modified will be true
+  if (this.isModified('password')) {
+    //If the password is modified, we will hash it
+    const hashed = await Password.toHash(this.get('password')); //We use the Password service to hash the password
+    this.set('password', hashed); //We set the password to the hashed password
+  }
+  done(); //We call done to indicate that we are done with the pre-save hook
 });
 
 //userSchema.statics is a way to define static methods on the schema
