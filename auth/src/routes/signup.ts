@@ -54,7 +54,7 @@ router.post(
 
     // Put JWT inside the cookie session objecr
     req.session = {
-      jwt: userJwt, //We set the jwt in the session
+      jwt: userJwt, //W e set the jwt in the session
     };
 
     res.status(201).send(user); //201 is the status code for created
