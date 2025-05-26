@@ -2,6 +2,7 @@ import express from 'express';
 import 'express-async-errors'; //This is a middleware that will handle async errors in the application
 import { json } from 'body-parser';
 import mongoose from 'mongoose';
+import cookieSession from 'cookie-session'; //This is a middleware that will handle cookies in the application
 
 //This is a named import, so we can import it in the index.ts file
 import { currentUserRouter } from './routes/current-user';
@@ -12,8 +13,15 @@ import { errorHandler } from './middlewares/error_handler';
 import { NotFoundError } from './errors/not-found-error';
 
 const app = express();
+app.set('trust proxy', true); //This is used to trust the proxy headers, which is necessary when running behind a reverse proxy like Nginx or Heroku
 app.use(json());
 
+app.use(
+  cookieSession({
+    signed: false, //This means that the cookie will not be signed
+    secure: true, //This means that the cookie will only be sent over HTTPS
+  })
+);
 //Routes from the routes folder
 app.use(currentUserRouter);
 app.use(signInRouter);
