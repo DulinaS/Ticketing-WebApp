@@ -1,8 +1,9 @@
 import express, { Request, Response } from 'express';
-import { body, validationResult } from 'express-validator';
+import { body } from 'express-validator';
 import { User } from '../models/user';
-import { RequestValidationError } from '../errors/request-validation-error';
 import { BadRequestError } from '../errors/bad-request-error';
+import { validateRequest } from '../middlewares/validate-request';
+//This is a middleware that will validate the request body
 import jwt from 'jsonwebtoken'; //Importing jwt to sign the token
 
 const router = express.Router();
@@ -16,15 +17,9 @@ router.post(
       .isLength({ min: 4, max: 20 })
       .withMessage('Password must be between 4 and 20 characters'),
   ],
+  validateRequest, //This is a middleware that will validate the request body
+  //After that, we will define the route handler
   async (req: Request, res: Response) => {
-    const errors = validationResult(req); //We use the validationResult function to get the errors from the request
-
-    //If there are errors, we send a 400 response with the errors
-    if (!errors.isEmpty()) {
-      //This will be picked up by the error handler middleware
-      throw new RequestValidationError(errors.array()); //We throw an error if there are errors
-    }
-
     //After validation, we can create a new user
     //Before creating a user, we should check if the user already exists
     const { email, password } = req.body;
