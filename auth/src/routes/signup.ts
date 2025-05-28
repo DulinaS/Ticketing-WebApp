@@ -37,6 +37,8 @@ router.post(
     //If the user does not exist, Hash the password
 
     // Create a new user instance
+    //Inside the User model, we have defined a build method that will create a new user instance
+    //Before creating it will has hashed the password
     const user = User.build({ email, password });
 
     // Save the user to the database
