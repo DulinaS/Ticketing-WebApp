@@ -42,6 +42,11 @@ app.use(errorHandler);
 //This is the function that will start the application and connect to the MongoDB database
 //We are using mongoose to connect to the MongoDB database
 const start = async () => {
+  //This is where we check if the JWT_KEY is defined
+  if (!process.env.JWT_KEY) {
+    throw new Error('JWT_KEY must be defined'); //We throw an error if the JWT_KEY is not defined
+  }
+
   //auth-mongo-srv is the name of the service
   //We are using the service name to connect to the MongoDB database
   try {
