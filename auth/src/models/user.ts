@@ -20,17 +20,32 @@ interface UserDoc extends mongoose.Document {
 }
 
 //schema is a blueprint for the data
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String, //In mongoose, String is a type that represents a string value
-    required: true,
-    unique: true, //This will ensure that the email is unique in the database
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String, //In mongoose, String is a type that represents a string value
+      required: true,
+      unique: true, //This will ensure that the email is unique in the database
+    },
+    password: {
+      type: String, //In mongoose, String is a type that represents a string value
+      required: true,
+    },
   },
-  password: {
-    type: String, //In mongoose, String is a type that represents a string value
-    required: true,
-  },
-});
+  //This is the options object that we pass to the schema
+  //It has a toJSON method that will transform the document before sending it as a response
+  //This is used to remove the _id, password, and __v fields from the response
+  {
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id; //We are adding the id field to the response
+        delete ret._id; //We are deleting the _id field from the response
+        delete ret.password; //We are deleting the password field from the response
+        delete ret.__v; //We are deleting the __v field from the response
+      },
+    },
+  }
+);
 
 //This is a pre-save hook that will run before the user is saved to the database
 //What we do is we hash the password before saving the user to the database
