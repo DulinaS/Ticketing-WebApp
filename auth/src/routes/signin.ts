@@ -24,6 +24,7 @@ router.post(
   async (req: Request, res: Response) => {
     //After validation, we can handle the user sign-in logic
     const { email, password } = req.body;
+
     //Before creating a user, we should check if the user already exists using email
     //This retrieves the user from the database based on the email
     const exisitingUser = await User.findOne({ email });
