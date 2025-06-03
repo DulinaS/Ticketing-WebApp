@@ -7,12 +7,17 @@ Your tests can connect to this in-memory database like a normal MongoDB instance
 
 import mongoose from 'mongoose';
 import { app } from '../app'; //Import app declaration
+import request from 'supertest';
+
+//Tell typescript there is a global property called signin()
+declare global {
+  var signin: () => Promise<string[]>;
+}
 
 let mongo: any;
 
 //Runs before all tests run in
 beforeAll(async () => {
-  //define JWT key
   process.env.JWT_KEY = 'asdfasdf';
 
   mongo = await MongoMemoryServer.create();
@@ -37,3 +42,25 @@ afterAll(async () => {
   }
   await mongoose.connection.close();
 });
+
+global.signin = async () => {
+  const email = 'test@test.com'; //email we're trying to authenticate
+  const password = 'password';
+
+  const response = await request(app)
+    .post('/api/users/signup')
+    .send({
+      email,
+      password,
+    })
+    .expect(201);
+
+  //Pull authentication cookie
+  const cookie = response.get('Set-Cookie');
+
+  if (!cookie) {
+    throw new Error('Expected cookie but got undefined.');
+  }
+
+  return cookie;
+};
