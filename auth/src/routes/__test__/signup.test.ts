@@ -66,3 +66,17 @@ it('dissallows duplicate emails', async () => {
     })
     .expect(400); // Expect an error response (HTTP 400) due to duplicate email
 });
+
+// Test to check if a cookie is set after a successful signup
+it('sets a cookie after succcesful signup', async () => {
+  const response = await request(app)
+    .post('/api/users/signup') // The route to create a new user
+    .send({
+      email: 'test@test.com',
+      password: 'password',
+    })
+    .expect(201);
+
+  // Check that the response includes a 'Set-Cookie' header
+  expect(response.get('Set-Cookie')).toBeDefined();
+});

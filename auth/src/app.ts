@@ -20,7 +20,7 @@ app.use(json());
 app.use(
   cookieSession({
     signed: false, //This means that the cookie will not be signed
-    secure: true, //This means that the cookie will only be sent over HTTPS
+    secure: process.env.NODE_ENV !== 'test', //If environment is 'test' ---> secure = false otherwise secure :true
   })
 );
 //Routes from the routes folder
