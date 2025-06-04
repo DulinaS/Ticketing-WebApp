@@ -25,7 +25,7 @@ it('Responds with details about the current user', async () => {
 });
 
 /*
-//Remove 'requireAuth' in current-user route path in order to this to work.
+//Remove  'requireAuth' in current-user route path in order to this to work.
 it('responds with null if not authenticated', async () => {
   // Send a request to get current user details without any authentication (no cookie)
   const response = await request(app)
