@@ -3,7 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 
 This server runs only during your tests and is destroyed after tests complete.
 
-Your tests can connect to this in-memory database like a normal MongoDB instance. */
+Your tests  can connect to this in-memory database like a normal MongoDB instance. */
 
 import mongoose from 'mongoose';
 import { app } from '../app'; //Import app declaration
