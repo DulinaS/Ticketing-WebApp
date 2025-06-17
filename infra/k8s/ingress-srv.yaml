@@ -9,11 +9,18 @@ spec:
   rules:
     - host: ticketing.dev
       http:
-        paths:
+        paths: #Array of Paths - When incoming request comes it goes sequencially below
           - path: /api/users/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: auth-srv
+                port:
+                  number: 3000
+          - path: /?(.*) #Path to client service - /?(.*) --> Catch any path and route to client
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: client-srv
                 port:
                   number: 3000

@@ -19,3 +19,11 @@ build:
         manual:
           - src: 'src/**/*.ts' #if we make a change to ts file in auth folder skaffold will directly copy it to POD
             dest: .
+    - image: us.gcr.io/ticketing-dev-460619/client
+      context: client #This is the folder where the Dockerfile is located
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: '**/*.js' #if we make a change to ts file in auth folder skaffold will directly copy it to POD
+            dest: .
