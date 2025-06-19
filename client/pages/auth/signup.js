@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import Router from 'next/router';
 import useRequest from '../../hooks/use-request';
 
 export default () => {
@@ -7,18 +7,19 @@ export default () => {
   const [password, setPassword] = useState('');
 
   const { doRequest, errors } = useRequest({
-    url: '/api/users/signup',
-    method: 'post',
+    url: '/api/users/signup', // The URL where the request is made
+    method: 'post', // The HTTP method, in this case, POST
     body: {
+      // The data to send to the server
       email,
       password,
     },
+    onSuccess: () => Router.push('/'), // Callback function after successful request
   });
 
   const onSubmit = async (event) => {
-    event.preventDefault();
-
-    doRequest();
+    event.preventDefault(); // Prevents the form from reloading the page
+    await doRequest(); // Triggers the API request
   };
 
   return (
