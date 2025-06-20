@@ -13,7 +13,7 @@ export default ({ req }) => {
     //We are on browser
     // /---> base URL -> ticketing.dev
     return axios.create({
-      baseURL: '/  ',
+      baseURL: '/',
     });
   }
 };
