@@ -1,6 +1,15 @@
 import 'bootstrap/dist/css/bootstrap.css';
+import buildClient from '../api/build-client';
 
-//When ever we go to a page in pages, this adds styling to it
-export default ({ Component, pageProps }) => {
-  return <Component {...pageProps} />;
+const AppComponent = ({ Component, pageProps }) => {
+  return (
+    <div>
+      <h1>Header!</h1>
+      <Component {...pageProps} />
+    </div>
+  );
 };
+//fetch data during SSR
+AppComponent.getInitialProps = () => {};
+
+export default AppComponent;
