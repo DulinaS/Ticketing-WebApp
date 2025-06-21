@@ -1,7 +1,7 @@
 import buildClient from '../api/build-client';
 
 const LandingPage = ({ currentUser }) => {
-  console.log(currentUser);
+  console.log('LandingPage currentUser:', currentUser);
   //axios.get('/api/users/currentuser');
   return currentUser ? (
     <h1>You are signed in</h1>
@@ -10,12 +10,12 @@ const LandingPage = ({ currentUser }) => {
   );
 };
 
-LandingPage.getInitialProps = async (context) => {
+/* LandingPage.getInitialProps = async (context) => {
   console.log('Landing page');
   const client = buildClient(context);
   const { data } = await client.get('/api/users/currentuser');
 
   return data;
-};
+}; */
 
 export default LandingPage;
