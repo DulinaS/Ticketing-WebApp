@@ -10,6 +10,14 @@ const AppComponent = ({ Component, pageProps }) => {
   );
 };
 //fetch data during SSR
-AppComponent.getInitialProps = () => {};
+AppComponent.getInitialProps = async (appContext) => {
+  const client = buildClient(appContext.ctx);
+  const { data } = await client.get('/api/users/currentuser');
+  console.log(data);
+
+  console.log('This is AppComponent getInitialMethod');
+
+  return {};
+};
 
 export default AppComponent;
