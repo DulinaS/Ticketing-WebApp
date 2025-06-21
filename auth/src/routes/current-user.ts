@@ -6,7 +6,7 @@ import { requireAuth } from '../middlewares/require-auth';
 //What this does is create a new router object that can be used to define routes
 const router = express.Router();
 
-router.get('/api/users/currentuser', currentUser, requireAuth, (req, res) => {
+router.get('/api/users/currentuser', currentUser, (req, res) => {
   res.send({ currentUser: req.currentUser || null });
 
   //Now the middleware does all
@@ -19,4 +19,4 @@ router.get('/api/users/currentuser', currentUser, requireAuth, (req, res) => {
 });
 
 export { router as currentUserRouter };
-//This is a named export, so we can import it in the index.ts file
+//This is  named export, so we can import it in the index.ts file
