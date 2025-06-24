@@ -12,4 +12,4 @@ const color: Color = {
 
 console.log(color);
 
-//Need to convert this ts file to js file
+export default color;
