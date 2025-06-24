@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const color = {
-    red: 20,
+    red: 30,
     blue: 10,
     green: 10,
 };
