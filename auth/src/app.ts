@@ -10,8 +10,8 @@ import { currentUserRouter } from './routes/current-user';
 import { signInRouter } from './routes/signin';
 import { signOutRouter } from './routes/signout';
 import { signUpRouter } from './routes/signup';
-import { errorHandler } from './middlewares/error_handler';
-import { NotFoundError } from './errors/not-found-error';
+import { errorHandler } from '@dulinatickets/common';
+import { NotFoundError } from '@dulinatickets/common';
 
 const app = express();
 app.set('trust proxy', true); //This is used to trust the proxy headers, which is necessary when running behind a reverse proxy like Nginx or Heroku

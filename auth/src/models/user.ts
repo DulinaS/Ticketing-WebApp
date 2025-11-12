@@ -9,6 +9,9 @@ interface UserAttrs {
 }
 
 // An interface that describes the properties that a User model has
+// To the model we are adding a build method that will create a new User instance
+// with the attributes we passed in
+// It has the properties of a user and the build method to
 interface UserModel extends mongoose.Model<UserDoc> {
   build(attrs: UserAttrs): UserDoc; //This is a method that will create a new User instance with the attributes we passed in
 }
@@ -37,7 +40,7 @@ const userSchema = new mongoose.Schema(
   //This is used to remove the _id, password, and __v fields from the response
   {
     toJSON: {
-      transform(doc, ret) {
+      transform(doc: any, ret: any) {
         ret.id = ret._id; //We are adding the id field to the response
         delete ret._id; //We are deleting the _id field from the response
         delete ret.password; //We are deleting the password field from the response

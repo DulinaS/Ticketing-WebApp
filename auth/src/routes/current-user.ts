@@ -1,6 +1,5 @@
 import express from 'express';
-import { currentUser } from '../middlewares/current-user';
-import { requireAuth } from '../middlewares/require-auth';
+import { currentUser } from '@dulinatickets/common';
 
 //Router is a mini express application
 //What this does is create a new router object that can be used to define routes

@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { User } from '../models/user';
-import { BadRequestError } from '../errors/bad-request-error';
-import { validateRequest } from '../middlewares/validate-request';
+import { BadRequestError } from '@dulinatickets/common';
+import { validateRequest } from '@dulinatickets/common';
 //This is a middleware that will validate the request body
 import jwt from 'jsonwebtoken'; //Importing jwt to sign the token
 

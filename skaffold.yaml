@@ -5,13 +5,10 @@ manifests:
     #By adding this we're telling skaffold to watch for changes in the k8s folder and deploy them
     - ./infra/k8s/*
 build:
-  #local:
-  #  push: false   #This is set to false because we don't want to push the image to docker Hub when we build it
-  googleCloudBuild:
-    projectId: ticketing-dev-460619
+  local:
+    push: false #This is set to false because we don't want to push the image to docker Hub when we build it
   artifacts:
-    #This is the image name that will be used to build the image assigned by Google Cloud Build
-    - image: us.gcr.io/ticketing-dev-460619/auth
+    - image: dulina786/auth
       context: auth #This is the folder where the Dockerfile is located
       docker:
         dockerfile: Dockerfile
@@ -19,7 +16,7 @@ build:
         manual:
           - src: 'src/**/*.ts' #if we make a change to ts file in auth folder skaffold will directly copy it to POD
             dest: .
-    - image: us.gcr.io/ticketing-dev-460619/client
+    - image: dulina786/client
       context: client #This is the folder where the Dockerfile is located
       docker:
         dockerfile: Dockerfile

@@ -16,7 +16,7 @@ spec:
       #POD behaviour
       containers:
         - name: client
-          image: us.gcr.io/ticketing-dev-460619/client
+          image: dulina786/client
           env:
             - name: JWT_KEY
               valueFrom:

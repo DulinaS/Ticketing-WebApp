@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
-import { validateRequest } from '../middlewares/validate-request';
+import { validateRequest } from '@dulinatickets/common';
 import { User } from '../models/user';
-import { BadRequestError } from '../errors/bad-request-error';
+import { BadRequestError } from '@dulinatickets/common';
 import { Password } from '../services/password'; //Importing the Password service to handle password hashing and comparison
 import jwt from 'jsonwebtoken';
 

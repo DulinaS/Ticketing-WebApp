@@ -1,3 +1,4 @@
+//Re-exporting all the files from the common package
 export * from './errors/bad-request-error';
 export * from './errors/not-found-error';
 export * from './errors/custom-error';
