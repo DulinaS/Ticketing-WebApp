@@ -8,10 +8,11 @@ Your tests  can connect to this in-memory database like a normal MongoDB instanc
 import mongoose from 'mongoose';
 import { app } from '../app'; //Import app declaration
 import request from 'supertest';
-
+import jwt from 'jsonwebtoken';
+import { Session } from 'inspector';
 //Tell typescript there is a global property called signin()
 declare global {
-  var signin: () => Promise<string[]>;
+  var signin: () => string[];
 }
 
 let mongo: any;
@@ -43,24 +44,26 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-global.signin = async () => {
-  const email = 'test@test.com'; //email we're trying to authenticate
-  const password = 'password';
+//Faking the authorization
+global.signin = () => {
+  //Build a JWT payload {id,email}
+  const payload = {
+    id: 'FakeID',
+    email: 'test@test.com',
+  };
 
-  const response = await request(app)
-    .post('/api/users/signup')
-    .send({
-      email,
-      password,
-    })
-    .expect(201);
+  //Create the JWT
+  const token = jwt.sign(payload, process.env.JWT_KEY!);
 
-  //Pull authentication cookie
-  const cookie = response.get('Set-Cookie');
+  //Build session Object {jwt: MY_JWT}
+  const session = { jwt: token };
 
-  if (!cookie) {
-    throw new Error('Expected cookie but got undefined.');
-  }
+  //Turn session into JSON
+  const sessionJSON = JSON.stringify(session);
 
-  return cookie;
+  //Take JSON and encode it as base 64
+  const base64 = Buffer.from(sessionJSON).toString('base64');
+
+  //return a string thats a cookie with encoded data
+  return [`session=${base64}`];
 };
