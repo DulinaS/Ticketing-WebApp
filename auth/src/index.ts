@@ -8,6 +8,10 @@ const start = async () => {
   if (!process.env.JWT_KEY) {
     throw new Error('JWT_KEY must be defined'); //We throw an error if the JWT_KEY is not defined
   }
+  //This is where we check if the MONGO_URI is defined
+  if (!process.env.MONGO_URI) {
+    throw new Error('MONGO_URI must be defined');
+  }
 
   //auth-mongo-srv is the name of the service
   //We are using the service name to connect to the MongoDB database

@@ -17,7 +17,7 @@ const start = async () => {
   //tickets-mongo-srv is the name of the service
   //We are using the service name to connect to the MongoDB database
   try {
-    await mongoose.connect('mongodb://tickets-mongo-srv:27017/tickets');
+    await mongoose.connect(process.env.MONGO_URI!);
     console.log('Connected to MongoDB');
   } catch (err) {
     console.error(err);
