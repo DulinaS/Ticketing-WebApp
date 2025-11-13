@@ -18,7 +18,8 @@ router.post(
       .withMessage('Password must be between 4 and 20 characters'),
   ],
   validateRequest, //This is a middleware that will validate the request body
-  //After that, we will define the route handler
+
+  //After that request is validated , we will move to the route handler
   async (req: Request, res: Response) => {
     //After validation, we can create a new user
     //Before creating a user, we should check if the user already exists

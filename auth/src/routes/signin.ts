@@ -21,6 +21,7 @@ router.post(
   ],
   //This is a middleware that will validate the request body
   validateRequest,
+
   async (req: Request, res: Response) => {
     //After validation, we can handle the user sign-in logic
     const { email, password } = req.body;
