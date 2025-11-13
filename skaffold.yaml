@@ -22,5 +22,13 @@ build:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: '**/*.js' #if we make a change to ts file in auth folder skaffold will directly copy it to POD
+          - src: '**/*.js' #if we make a change to js file in client folder skaffold will directly copy it to POD
+            dest: .
+    - image: dulina786/tickets
+      context: tickets #This is the folder where the Dockerfile is located
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts' #if we make a change to ts file in tickets folder skaffold will directly copy it to POD
             dest: .

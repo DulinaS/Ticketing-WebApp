@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tickets-depl
+spec:
+  replicas: 1
+  selector:
+    #Finds the pod with the label app: tickets
+    matchLabels:
+      app: tickets
+  template:
+    metadata:
+      labels:
+        app: tickets
+    spec:
+      containers:
+        - name: tickets
+          image: dulina786/tickets
+          env:
+            - name: MONGO_URI
+              value: mongodb://tickets-mongo-srv:27017/tickets
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
+
+---
+#Create a service for the tickets-depl
+apiVersion: v1
+kind: Service
+metadata:
+  name: tickets-srv
+spec:
+  #Find the pod with the label app: tickets
+  selector:
+    app: tickets
+  type: ClusterIP #What this does is that it creates a service that is only accessible from within the cluster
+  ports:
+    - name: tickets
+      port: 3000
+      targetPort: 3000

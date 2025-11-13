@@ -12,7 +12,7 @@ const start = async () => {
   //auth-mongo-srv is the name of the service
   //We are using the service name to connect to the MongoDB database
   try {
-    await mongoose.connect('mongodb://auth-mongo-srv:27017/auth');
+    await mongoose.connect(process.env.MONGO_URI!);
     console.log('Connected to MongoDB');
   } catch (err) {
     console.error(err);
