@@ -31,7 +31,7 @@ router.post(
 
     await ticket.save(); //Save the ticket to the database
 
-    res.sendStatus(201).send(ticket); //201 is the status code for created
+    res.status(201).send(ticket); //201 is the status code for created
   }
 );
 
