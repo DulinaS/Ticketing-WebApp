@@ -21,11 +21,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: auticketsh-mongo-srv
+  name: tickets-mongo-srv
 spec:
   type: ClusterIP #This service is only accessible within the cluster
   selector:
-    app: auticketsth-mongo #label that is going to used to match the pods
+    app: tickets-mongo #label that is going to used to match the pods
   ports:
     - name: db
       protocol: TCP

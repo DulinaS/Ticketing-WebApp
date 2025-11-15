@@ -3,6 +3,7 @@ import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { requireAuth } from '@dulinatickets/common';
 import { validateRequest } from '@dulinatickets/common';
+import { Ticket } from '../models/tickets';
 
 const router = express.Router();
 
@@ -18,8 +19,19 @@ router.post(
       .withMessage('Price must be greater than 0'),
   ],
   validateRequest, //Check the request format
-  (req: Request, res: Response) => {
-    res.sendStatus(200);
+  async (req: Request, res: Response) => {
+    const { title, price } = req.body;
+
+    const ticket = Ticket.build({
+      title,
+      price,
+      userId: req.currentUser!.id, //We get the userId from the currentUser middleware
+      //Current user is avalilable or not is checked in requireAuth middleware
+    });
+
+    await ticket.save(); //Save the ticket to the database
+
+    res.sendStatus(201).send(ticket); //201 is the status code for created
   }
 );
 
