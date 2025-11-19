@@ -23,6 +23,7 @@ client.on('connect', async () => {
       id: 'A123',
       title: 'Party',
       price: 50,
+      userId: 'user123',
     });
   } catch (error) {
     console.error(error);

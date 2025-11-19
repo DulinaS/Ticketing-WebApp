@@ -1,7 +1,7 @@
 import nats, { Message, Stan } from 'node-nats-streaming';
 import { randomBytes } from 'crypto';
 import { TicketCreatedListener } from './events/ticket-created-listener';
-import { Subjects } from './events/subjects';
+import { Subjects } from '../../common/src/events/subjects';
 
 console.clear();
 
