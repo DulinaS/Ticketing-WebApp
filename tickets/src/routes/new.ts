@@ -4,6 +4,8 @@ import { body } from 'express-validator';
 import { requireAuth } from '@dulinatickets/common';
 import { validateRequest } from '@dulinatickets/common';
 import { Ticket } from '../models/tickets';
+import { TicketCreatedPublisher } from '../events/publishers/ticket-created-publisher';
+import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 
@@ -30,6 +32,14 @@ router.post(
     });
 
     await ticket.save(); //Save the ticket to the database
+
+    //Publish an event saying that a ticket was created
+    await new TicketCreatedPublisher(natsWrapper.client).publish({
+      id: ticket.id,
+      title: ticket.title,
+      price: ticket.price,
+      userId: ticket.userId,
+    });
 
     res.status(201).send(ticket); //201 is the status code for created
   }
