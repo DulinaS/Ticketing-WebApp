@@ -14,13 +14,25 @@ const start = async () => {
   if (!process.env.MONGO_URI) {
     throw new Error('MONGO_URI must be defined');
   }
+  //This is where we check if the NATS_CLUSTER_ID is defined
+  if (!process.env.NATS_CLUSTER_ID) {
+    throw new Error('NATS_CLUSTER_ID must be defined');
+  }
+  //This is where we check if the NATS_CLIENT_ID is defined
+  if (!process.env.NATS_CLIENT_ID) {
+    throw new Error('NATS_CLIENT_ID must be defined');
+  }
+  //This is where we check if the NATS_URL is defined
+  if (!process.env.NATS_URL) {
+    throw new Error('NATS_URL must be defined');
+  }
 
   try {
     //Connect to NATS server
     await natsWrapper.connect(
-      'ticketing', //Cluster ID
-      'randomid', //Client ID
-      'http://nats-srv:4222' //URL (prevously localhost:4222, now nats-srv:4222 because of k8s)
+      process.env.NATS_CLUSTER_ID,
+      process.env.NATS_CLIENT_ID,
+      process.env.NATS_URL
     );
 
     //Graceful shutdown for NATS connection

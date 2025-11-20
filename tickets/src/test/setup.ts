@@ -23,6 +23,8 @@ jest.mock('../nats-wrapper');
 
 //Runs before all tests run in
 beforeAll(async () => {
+  jest.clearAllMocks(); //Clear any previous mock data
+
   process.env.JWT_KEY = 'asdfasdf';
 
   mongo = await MongoMemoryServer.create();
