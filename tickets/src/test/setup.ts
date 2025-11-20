@@ -17,6 +17,10 @@ declare global {
 
 let mongo: any;
 
+//JEST will see we're trying to mock the real file
+//Instead of the real file it will use nats-wrapper.ts in __mock__ directory
+jest.mock('../nats-wrapper');
+
 //Runs before all tests run in
 beforeAll(async () => {
   process.env.JWT_KEY = 'asdfasdf';
