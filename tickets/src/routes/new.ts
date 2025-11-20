@@ -8,7 +8,6 @@ import { TicketCreatedPublisher } from '../events/publishers/ticket-created-publ
 import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
-
 //requireAuth middleware is applied
 //If only authorized then goes to next route handler and send status code
 router.post(
@@ -30,8 +29,8 @@ router.post(
       userId: req.currentUser!.id, //We get the userId from the currentUser middleware
       //Current user is avalilable or not is checked in requireAuth middleware
     });
-
     await ticket.save(); //Save the ticket to the database
+    console.log('Saved ticket:', ticket);
 
     //Publish an event saying that a ticket was created
     await new TicketCreatedPublisher(natsWrapper.client).publish({
