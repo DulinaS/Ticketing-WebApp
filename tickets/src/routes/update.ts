@@ -7,6 +7,8 @@ import {
   requireAuth,
   NotAuthorizedError,
 } from '@dulinatickets/common';
+import { TicketUpdatedPublisher } from '../events/publishers/ticket-updated-publiher';
+import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 
@@ -44,6 +46,15 @@ router.put(
 
     //Save to mongodb database
     await ticket.save();
+    console.log('Updated ticket:', ticket);
+
+    //Publish an event saying that a ticket was updated
+    await new TicketUpdatedPublisher(natsWrapper.client).publish({
+      id: ticket.id,
+      title: ticket.title,
+      price: ticket.price,
+      userId: ticket.userId,
+    });
 
     res.send(ticket);
   }

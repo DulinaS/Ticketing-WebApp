@@ -19,7 +19,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@dulinatickets/common": "^1.0.7",
+    "@dulinatickets/common": "^1.0.9",
     "@types/mongoose": "^5.11.96",
     "express-async-errors": "^3.1.1",
     "mongoose": "^8.15.0",
