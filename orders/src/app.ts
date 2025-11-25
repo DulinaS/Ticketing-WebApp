@@ -9,10 +9,10 @@ import { errorHandler } from '@dulinatickets/common';
 import { NotFoundError } from '@dulinatickets/common';
 import { currentUser } from '@dulinatickets/common';
 
-import { createTicketRouter } from './routes/new';
-import { showTicketRouter } from './routes/show';
-import { indexTicketRouter } from './routes/index';
-import { updateTicketRouter } from './routes/update';
+import { createOrderRouter } from './routes/new';
+import { showOrderRouter } from './routes/show';
+import { indexOrderRouter } from './routes/index';
+import { deleteOrderRouter } from './routes/delete';
 
 const app = express();
 app.set('trust proxy', true); //This is used to trust the proxy headers, which is necessary when running behind a reverse proxy like Nginx or Heroku
@@ -29,10 +29,10 @@ app.use(
 app.use(currentUser);
 
 //Routes from the route folder
-app.use(createTicketRouter);
-app.use(showTicketRouter);
-app.use(indexTicketRouter);
-app.use(updateTicketRouter);
+app.use(createOrderRouter);
+app.use(showOrderRouter);
+app.use(indexOrderRouter);
+app.use(deleteOrderRouter);
 
 //This is a catch-all route that will handle any requests that don't match the above routes'
 //We have to throw a new NotFoundError here because we want to handle the error in the error handler middleware
