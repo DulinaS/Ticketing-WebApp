@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
+import { OrderStatus } from '@dulinatickets/common';
 
 //Attributes needed to create an order
 interface OrderAttrs {
   userId: string;
-  status: string;
+  status: OrderStatus;
   expiresAt: Date;
   ticket: TicketDoc;
 }
@@ -12,7 +13,7 @@ interface OrderAttrs {
 //Attributes that a created order has in a order document in db
 interface OrderDoc extends mongoose.Document {
   userId: string;
-  status: string;
+  status: OrderStatus;
   expiresAt: Date;
   ticket: TicketDoc;
 }
@@ -31,8 +32,10 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     status: {
-      type: String,
+      type: String, //
       required: true,
+      enum: Object.values(OrderStatus), //This makes sure that the status can only be one of the values in the OrderStatus enum
+      default: OrderStatus.Created,
     },
     expiresAt: {
       type: mongoose.Schema.Types.Date,
