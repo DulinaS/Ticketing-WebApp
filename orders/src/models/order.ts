@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
 import { OrderStatus } from '@dulinatickets/common';
+import { TicketDoc } from './ticket';
+
+//We export the OrderStatus enum so that we can use it in other files
+export { OrderStatus };
 
 //Attributes needed to create an order
 interface OrderAttrs {
