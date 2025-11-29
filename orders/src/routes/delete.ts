@@ -1,0 +1,42 @@
+import {
+  NotAuthorizedError,
+  NotFoundError,
+  OrderStatus,
+  requireAuth,
+} from '@dulinatickets/common';
+import express, { Request, Response } from 'express';
+import { Order } from '../models/order';
+import { OrderCancelledPublisher } from '../events/publishers/order-cancelled-publisher';
+import { natsWrapper } from '../nats-wrapper';
+
+const router = express.Router();
+
+router.delete(
+  '/api/orders/:orderId',
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const order = await Order.findById(req.params.orderId).populate('ticket');
+    //If order not found, throw error
+    if (!order) {
+      throw new NotFoundError();
+    }
+    //Make sure order belongs to the user making the request
+    if (order.userId !== req.currentUser!.id) {
+      throw new NotAuthorizedError();
+    }
+    order.status = OrderStatus.Cancelled;
+    await order.save();
+
+    //Publish an event saying that an order was cancelled
+    await new OrderCancelledPublisher(natsWrapper.client).publish({
+      id: order.id,
+      ticket: {
+        id: order.ticket.id,
+      },
+    });
+
+    res.status(204).send(order);
+  }
+);
+
+export { router as deleteOrderRouter };

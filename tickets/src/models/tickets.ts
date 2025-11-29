@@ -19,6 +19,7 @@ interface TicketDoc extends mongoose.Document {
 interface TicketModel extends mongoose.Model<TicketDoc> {
   //build method take TickerAttrs as attributes and returns a ticket Documnet
   build(attrs: TicketAttrs): TicketDoc;
+  //This type checks that the build method is called with the correct attributes
 }
 
 const ticketSchema = new mongoose.Schema(

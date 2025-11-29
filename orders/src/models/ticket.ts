@@ -1,0 +1,75 @@
+import mongoose from 'mongoose';
+import { Order, OrderStatus } from './order';
+
+//This ticket model is different from the ticket model in the tickets service
+//This ticket model only contains the properties that are required for the orders service
+
+//Attributes that are required to create a new Ticket
+interface TicketAttrs {
+  title: string;
+  price: number;
+}
+
+//Attributes that a created Ticket has in a ticket document in db
+interface TicketDoc extends mongoose.Document {
+  title: string;
+  price: number;
+  isReserved(): Promise<boolean>; //Check whether the ticket is reserved or not
+}
+
+//Methods in a model
+interface TicketModel extends mongoose.Model<TicketDoc> {
+  build(attrs: TicketAttrs): TicketDoc;
+}
+
+const schema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+  },
+  {
+    toJSON: {
+      transform(doc: any, ret: any) {
+        ret.id = ret._id;
+        delete ret._id;
+      },
+    },
+  }
+);
+
+//Add a static method to the schema to build a ticket
+schema.statics.build = (attrs: TicketAttrs) => {
+  return new Ticket(attrs);
+};
+
+//If ticket is reserved, it is associated with an order that is not cancelled
+//Find whether the ticket is already reserved
+//Run query to look at all orders. Find an order where the ticket
+//is the ticket we just found *and* the orders status is *not* cancelled
+//If we find an order from that means the ticket is reserved
+//This finds an existing order for the ticket that is not cancelled
+schema.methods.isReserved = async function () {
+  //this === the ticket document that we just called 'isReserved' on
+  const existingOrder = await Order.findOne({
+    ticket: this,
+    status: {
+      $in: [
+        OrderStatus.Created,
+        OrderStatus.AwaitingPayment,
+        OrderStatus.Complete,
+      ],
+    },
+  });
+  return !!existingOrder; //If existingOrder is null, return false. If it is not null, return true
+};
+
+const Ticket = mongoose.model<TicketDoc, TicketModel>('Ticket', schema);
+
+export { Ticket, TicketDoc };

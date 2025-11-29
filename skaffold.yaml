@@ -32,3 +32,11 @@ build:
         manual:
           - src: 'src/**/*.ts' #if we make a change to ts file in tickets folder skaffold will directly copy it to POD
             dest: .
+    - image: dulina786/orders
+      context: orders #This is the folder where the Dockerfile is located
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts' #if we make a change to ts file in orders folder skaffold will directly copy it to POD
+            dest: .
