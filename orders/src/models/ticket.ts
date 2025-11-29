@@ -6,6 +6,7 @@ import { Order, OrderStatus } from './order';
 
 //Attributes that are required to create a new Ticket
 interface TicketAttrs {
+  id: string; //We will set the id property manually because the ticket already exists in the tickets service
   title: string;
   price: number;
 }
@@ -46,7 +47,11 @@ const schema = new mongoose.Schema(
 
 //Add a static method to the schema to build a ticket
 schema.statics.build = (attrs: TicketAttrs) => {
-  return new Ticket(attrs);
+  return new Ticket({
+    _id: attrs.id, //Manually set the _id property to the id from attrs
+    title: attrs.title,
+    price: attrs.price,
+  });
 };
 
 //If ticket is reserved, it is associated with an order that is not cancelled
