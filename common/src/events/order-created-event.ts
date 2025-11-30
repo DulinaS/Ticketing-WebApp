@@ -9,6 +9,7 @@ export interface OrderCreatedEvent {
     status: OrderStatus; //Status of the order
     userId: string; //ID of the user who created the order
     expiresAt: string; //Expiration time of the order
+    version: number; //Version number of the order
     ticket: {
       id: string; //ID of the ticket associated with the order
       price: number; //Price of the ticket
