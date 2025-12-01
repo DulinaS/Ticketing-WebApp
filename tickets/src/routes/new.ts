@@ -38,6 +38,7 @@ router.post(
       title: ticket.title,
       price: ticket.price,
       userId: ticket.userId,
+      version: ticket.version,
     });
 
     res.status(201).send(ticket); //201 is the status code for created

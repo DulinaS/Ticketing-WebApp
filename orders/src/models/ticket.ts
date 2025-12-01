@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Order, OrderStatus } from './order';
-
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 //This ticket model is different from the ticket model in the tickets service
 //This ticket model only contains the properties that are required for the orders service
 
@@ -15,6 +15,7 @@ interface TicketAttrs {
 interface TicketDoc extends mongoose.Document {
   title: string;
   price: number;
+  version: number;
   isReserved(): Promise<boolean>; //Check whether the ticket is reserved or not
 }
 
@@ -44,6 +45,11 @@ const schema = new mongoose.Schema(
     },
   }
 );
+
+//Use the updateIfCurrentPlugin to handle optimistic concurrency control
+schema.plugin(updateIfCurrentPlugin);
+//Set the version key to 'version' instead of default '__v'
+schema.set('versionKey', 'version');
 
 //Add a static method to the schema to build a ticket
 schema.statics.build = (attrs: TicketAttrs) => {
