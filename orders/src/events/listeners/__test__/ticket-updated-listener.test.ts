@@ -63,3 +63,17 @@ it('acks the message', async () => {
   //Write assertions to make sure ack function is called to acknowledge the message
   expect(msg.ack).toHaveBeenCalled();
 });
+
+//Test to make sure out of order events are not processed
+it('does not call ack if the event has a skipped version number', async () => {
+  const { listener, data, msg } = await setup();
+  data.version = 10; //Skip to version 10
+
+  //Try to use the listener to process the data object and message object
+  try {
+    await listener.onMessage(data, msg);
+  } catch (err) {
+    //Write assertions to make sure ack function is not called to acknowledge the message
+    expect(msg.ack).not.toHaveBeenCalled();
+  }
+});
