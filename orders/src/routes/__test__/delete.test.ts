@@ -4,11 +4,13 @@ import { Ticket } from '../../models/ticket';
 import { OrderStatus } from '@dulinatickets/common';
 import { Order } from '../../models/order';
 import { natsWrapper } from '../../nats-wrapper';
+import mongoose from 'mongoose';
 
 it('marks an order as cancelled', async () => {
   const user = global.signin();
   //Create a ticket
   const ticket = Ticket.build({
+    id: new mongoose.Types.ObjectId().toHexString(),
     title: 'concert',
     price: 20,
   });
@@ -36,6 +38,7 @@ it('Publishes an event', async () => {
   const user = global.signin();
   //Create a ticket
   const ticket = Ticket.build({
+    id: new mongoose.Types.ObjectId().toHexString(),
     title: 'concert',
     price: 20,
   });
