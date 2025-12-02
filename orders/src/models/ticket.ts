@@ -22,6 +22,13 @@ interface TicketDoc extends mongoose.Document {
 //Methods in a model
 interface TicketModel extends mongoose.Model<TicketDoc> {
   build(attrs: TicketAttrs): TicketDoc;
+
+  //Find a ticket by event data (id and version)
+  //This is used to ensure that we are processing events in the correct order
+  findByEvent(event: {
+    id: string;
+    version: number;
+  }): Promise<TicketDoc | null>;
 }
 
 const schema = new mongoose.Schema(
@@ -57,6 +64,14 @@ schema.statics.build = (attrs: TicketAttrs) => {
     _id: attrs.id, //Manually set the _id property to the id from attrs
     title: attrs.title,
     price: attrs.price,
+  });
+};
+
+//Add a static method to find a ticket by event data
+schema.statics.findByEvent = (event: { id: string; version: number }) => {
+  return Ticket.findOne({
+    _id: event.id,
+    version: event.version - 1,
   });
 };
 
