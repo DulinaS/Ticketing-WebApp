@@ -13,7 +13,7 @@ abstract class Listener<T extends Event> {
   abstract queueGroupName: string; //Queue group name
   abstract onMessage(data: T['data'], msg: Message): void; //Method to handle the message
 
-  private client: Stan; //NATS client
+  protected client: Stan; //NATS client
   protected ackWait = 5 * 1000; //5 seconds
 
   //Passing client through constructor

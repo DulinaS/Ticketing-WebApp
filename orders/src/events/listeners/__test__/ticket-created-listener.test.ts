@@ -21,10 +21,11 @@ const setup = async () => {
 
   //create a fake message object
   // We don't need to implement all the methods in Message, just the ack method
-  // Cast the partial object to Message for the test
-  const msg = {
+  // use ts-ignore to ignore the type checking error
+  // @ts-ignore
+  const msg: Message = {
     ack: jest.fn(), //mock function to track if it's called
-  } as unknown as Message;
+  };
 
   return { listener, data, msg };
 };
