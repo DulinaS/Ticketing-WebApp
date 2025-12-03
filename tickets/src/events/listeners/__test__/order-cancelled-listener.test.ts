@@ -57,8 +57,7 @@ it('updates the ticket, publishes an event, and acks the message', async () => {
   //Retrieve the updated ticket
   const updatedTicket = await Ticket.findById(ticket.id);
 
-  //Write assertions to make sure the ticket was updated
-  expect(updatedTicket).toBeDefined();
+  //Write assertions to make sure the ticket was updated;
   expect(updatedTicket!.orderId).not.toBeDefined(); //orderId should be undefined after cancellation
   expect(msg.ack).toHaveBeenCalled(); //ack should be called
 
