@@ -20,11 +20,10 @@ let mongo: any;
 //JEST will see we're trying to mock the real file
 //Instead of the real file it will use nats-wrapper.ts in __mock__ directory
 jest.mock('../nats-wrapper');
+//---------------------------------
 
 //Runs before all tests run in
 beforeAll(async () => {
-  jest.clearAllMocks(); //Clear any previous mock data
-
   process.env.JWT_KEY = 'asdfasdf';
 
   mongo = await MongoMemoryServer.create();
@@ -34,6 +33,8 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  jest.clearAllMocks();
+
   if (mongoose.connection.db) {
     const collections = await mongoose.connection.db.collections();
 
@@ -48,7 +49,7 @@ afterAll(async () => {
     await mongo.stop();
   }
   await mongoose.connection.close();
-});
+}, 50000);
 
 //Faking the authorization
 global.signin = () => {

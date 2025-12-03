@@ -6,8 +6,9 @@ import {
   NotFoundError,
   requireAuth,
   NotAuthorizedError,
+  BadRequestError,
 } from '@dulinatickets/common';
-import { TicketUpdatedPublisher } from '../events/publishers/ticket-updated-publiher';
+import { TicketUpdatedPublisher } from '../events/publishers/ticket-updated-publisher';
 import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
@@ -29,6 +30,11 @@ router.put(
     //No Ticket Found
     if (!ticket) {
       throw new NotFoundError();
+    }
+
+    //Check if the ticket is reserved
+    if (ticket.orderId) {
+      throw new BadRequestError('Cannot update a reserved Ticket'); //Cannot edit a reserved ticket
     }
 
     //Check the request userId and ticket's userID equal
@@ -54,6 +60,7 @@ router.put(
       title: ticket.title,
       price: ticket.price,
       userId: ticket.userId,
+      version: ticket.version,
     });
 
     res.send(ticket);

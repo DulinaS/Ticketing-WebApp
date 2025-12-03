@@ -11,7 +11,7 @@ interface Event {
 export abstract class Publisher<T extends Event> {
   abstract subject: T['subject']; //Subject(Event) to publish to
 
-  private client: Stan; //NATS client
+  protected client: Stan; //NATS client
 
   //Passing client through constructor
   constructor(client: Stan) {

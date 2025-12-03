@@ -5,6 +5,7 @@ export interface TicketCreatedEvent {
   subject: Subjects.TicketCreated; //Subject of the event (link to Subjects enum)
   data: {
     id: string; //ID of the ticket
+    version: number; //Version number of the ticket
     title: string; //Title of the ticket
     price: number; //Price of the ticket
     userId: string;

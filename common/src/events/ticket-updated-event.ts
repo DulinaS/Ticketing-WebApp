@@ -4,8 +4,10 @@ export interface TicketUpdatedEvent {
   subject: Subjects.TicketUpdated; //Subject of the event (link to Subjects enum)
   data: {
     id: string; //ID of the ticket
+    version: number; //Version number of the ticket
     title: string; //Title of the ticket
     price: number; //Price of the ticket
     userId: string;
+    orderId?: string; //Optional orderId property
   };
 }

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { OrderStatus } from '@dulinatickets/common';
 import { TicketDoc } from './ticket';
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 //We export the OrderStatus enum so that we can use it in other files
 export { OrderStatus };
@@ -20,6 +21,7 @@ interface OrderDoc extends mongoose.Document {
   status: OrderStatus;
   expiresAt: Date;
   ticket: TicketDoc;
+  version: number;
 }
 
 //Methods in a model
@@ -59,6 +61,10 @@ const orderSchema = new mongoose.Schema(
     },
   }
 );
+
+//Use the updateIfCurrentPlugin to implement optimistic concurrency control
+orderSchema.set('versionKey', 'version');
+orderSchema.plugin(updateIfCurrentPlugin);
 
 orderSchema.statics.build = (attrs: OrderAttrs) => {
   return new Order(attrs);

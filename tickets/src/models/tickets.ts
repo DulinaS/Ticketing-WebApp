@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 //Attributes needed to create a ticket
 interface TicketAttrs {
@@ -12,6 +13,8 @@ interface TicketDoc extends mongoose.Document {
   title: string;
   price: number;
   userId: string;
+  version: number;
+  orderId?: string; //Optional property
 }
 
 //Methods in a model
@@ -36,6 +39,9 @@ const ticketSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    orderId: {
+      type: String, //Required is false because a ticket may or may not be reserved
+    },
   },
   {
     toJSON: {
@@ -47,6 +53,11 @@ const ticketSchema = new mongoose.Schema(
     },
   }
 );
+
+//Use the updateIfCurrentPlugin to handle optimistic concurrency control
+ticketSchema.plugin(updateIfCurrentPlugin);
+//Set the version key to 'version' instead of default '__v'
+ticketSchema.set('versionKey', 'version');
 
 //Adding a static method to the ticketSchema
 //This returns a new Ticket instance with the attributes we passed in

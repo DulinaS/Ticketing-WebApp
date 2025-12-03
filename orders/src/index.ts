@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import { app } from './app'; //import app declatration
 import { natsWrapper } from './nats-wrapper';
+import { TicketCreatedListener } from './events/listeners/ticket-created-listener';
+import { TicketUpdatedListener } from './events/listeners/ticket-updated-listener';
 
 //This is the function that will start the application and connect to the MongoDB database
 //We are using mongoose to connect to the MongoDB database
@@ -42,6 +44,11 @@ const start = async () => {
     });
     process.on('SIGINT', () => natsWrapper.client.close());
     process.on('SIGTERM', () => natsWrapper.client.close());
+
+    //Listen for TicketCreated events
+    new TicketCreatedListener(natsWrapper.client).listen();
+    //Listen for TicketUpdated events
+    new TicketUpdatedListener(natsWrapper.client).listen();
 
     //Connect to MongoDB database - MONGO_URI is defined in k8s tickets-depl.yaml
     await mongoose.connect(process.env.MONGO_URI!);
