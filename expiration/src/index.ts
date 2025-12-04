@@ -1,4 +1,5 @@
 import { natsWrapper } from './nats-wrapper';
+import { OrderCreatedListener } from './events/listeners/order-created-listener';
 
 //This is the function that will start the application and connect to the MongoDB database
 //We are using mongoose to connect to the MongoDB database
@@ -31,6 +32,8 @@ const start = async () => {
     });
     process.on('SIGINT', () => natsWrapper.client.close());
     process.on('SIGTERM', () => natsWrapper.client.close());
+
+    new OrderCreatedListener(natsWrapper.client).listen();
   } catch (err) {
     console.error(err);
   }
