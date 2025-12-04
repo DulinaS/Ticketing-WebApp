@@ -1,0 +1,41 @@
+#This is the deployment file for expiration service
+#what this does is that it tells k8s to create a pod with the expiration service container
+#This connects to the NATS server and Redis server
+#Nats server is used to listen to events from other services
+#Redis server is used to store the expiration data
+#We don't need to create a service for expiration since it doesn't
+#need to be accessed from other services or outside the cluster
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expiration-depl
+spec:
+  replicas: 1
+  selector:
+    #Finds the pod with the label app: expiration
+    matchLabels:
+      app: expiration
+  template:
+    metadata:
+      labels:
+        app: expiration
+    spec:
+      containers:
+        - name: expiration
+          image: dulina786/expiration
+          env:
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NATS_URL
+              value: 'nats://nats-srv:4222'
+            - name: NATS_CLUSTER_ID
+              value: 'ticketing'
+            - name: REDIS_HOST #The hostname for the Redis service we created
+              value: expiration-redis-srv #What this does is that it tells the expiration service to connect to the Redis service using this hostname
+---
+#Don't need a service for expiration since it doesn't
+#need to be accessed from other services or outside the cluster
+#It's because expiration service only listens to NATS events and doesn't have any HTTP endpoints

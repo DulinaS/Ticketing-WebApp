@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expiration-redis-depl
+spec:
+  replicas: 1 #This tells the k8s to run 1 replica of this deployment
+  selector:
+    matchLabels:
+      app: expiration-redis #label that is going to used to match the pods
+  template:
+    metadata:
+      labels:
+        app: expiration-redis #label that is going to applied for the pods
+    spec:
+      containers:
+        - name: expiration-redis #name of the container
+          image: redis #From the official mongo image in docker hub
+
+---
+#ClusterIP service for the expiration-redis deployment
+apiVersion: v1
+kind: Service
+metadata:
+  name: expiration-redis-srv
+spec:
+  type: ClusterIP #This service is only accessible within the cluster
+  selector:
+    app: expiration-redis #label that is going to used to match the pods
+  ports:
+    - name: db
+      protocol: TCP
+      #Default port for Redis is 6379
+      port: 6379 #port that the service is going to listen on
+      targetPort: 6379 #port that the container is going to listen on
