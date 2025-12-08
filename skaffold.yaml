@@ -40,3 +40,11 @@ build:
         manual:
           - src: 'src/**/*.ts' #if we make a change to ts file in orders folder skaffold will directly copy it to POD
             dest: .
+    - image: dulina786/expiration
+      context: expiration #This is the folder where the Dockerfile is located
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts' #if we make a change to ts file in expiration folder skaffold will directly copy it to POD
+            dest: .
