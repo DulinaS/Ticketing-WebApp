@@ -4,6 +4,7 @@ import { natsWrapper } from './nats-wrapper';
 import { TicketCreatedListener } from './events/listeners/ticket-created-listener';
 import { TicketUpdatedListener } from './events/listeners/ticket-updated-listener';
 import { ExpirationCompleteListener } from './events/listeners/expiration-complete-listener';
+import { PaymentCreatedListener } from './events/listeners/payment-created-listener';
 
 //This is the function that will start the application and connect to the MongoDB database
 //We are using mongoose to connect to the MongoDB database
@@ -52,6 +53,8 @@ const start = async () => {
     new TicketUpdatedListener(natsWrapper.client).listen();
     //Listen for ExpirationComplete events
     new ExpirationCompleteListener(natsWrapper.client).listen();
+    //Listen for PaymentCreated events
+    new PaymentCreatedListener(natsWrapper.client).listen();
 
     //Connect to MongoDB database - MONGO_URI is defined in k8s tickets-depl.yaml
     await mongoose.connect(process.env.MONGO_URI!);
