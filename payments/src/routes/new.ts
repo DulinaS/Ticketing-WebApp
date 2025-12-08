@@ -10,6 +10,7 @@ import {
   OrderStatus,
 } from '@dulinatickets/common';
 import { Order } from '../models/order';
+import { stripe } from '../stripe';
 
 const router = express.Router();
 
@@ -39,8 +40,14 @@ router.post(
     if (order.status === OrderStatus.Cancelled) {
       throw new BadRequestError('Cannot pay for a cancelled order');
     }
-    //Here we would normally create a charge with Stripe or another payment processor
-    res.send({ status: 'success' });
+    //Here we would normally create a charge with Stripe
+    await stripe.charges.create({
+      currency: 'usd',
+      amount: order.price * 100, //Stripe works with cents
+      source: token,
+    });
+
+    res.status(201).send({ success: true });
   }
 );
 
