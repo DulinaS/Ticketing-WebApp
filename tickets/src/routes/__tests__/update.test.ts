@@ -1,6 +1,8 @@
 import request from 'supertest';
 import { app } from '../../app';
 import mongoose from 'mongoose';
+import { natsWrapper } from '../../nats-wrapper';
+import { Ticket } from '../../models/tickets';
 
 it('returns a 404 if the provided id does not exist', async () => {
   //Get a random valid userId
@@ -103,10 +105,64 @@ it('updates the tikcet provided valid details', async () => {
     })
     .expect(200);
 
+  //Get the ticket to verify the updates
   const ticketResponse = await request(app)
     .get(`/api/tickets/${response.body.id}`)
     .send();
 
   expect(ticketResponse.body.title).toEqual('Title Updated');
   expect(ticketResponse.body.price).toEqual(100);
+});
+
+it('publishes an event', async () => {
+  const cookie = global.signin();
+
+  //create ticket first
+  const response = await request(app)
+    .post('/api/tickets')
+    .set('Cookie', cookie)
+    .send({
+      title: 'Dummy',
+      price: 10,
+    });
+
+  //Update
+  await request(app)
+    .put(`/api/tickets/${response.body.id}`)
+    .set('Cookie', cookie) //same Cookie is used to make and update ticket
+    .send({
+      title: 'Title Updated',
+      price: 100,
+    })
+    .expect(200);
+
+  expect(natsWrapper.client.publish).toHaveBeenCalled();
+});
+
+it('rejects updates if the ticket is reserved', async () => {
+  const cookie = global.signin();
+
+  //create ticket first
+  const response = await request(app)
+    .post('/api/tickets')
+    .set('Cookie', cookie)
+    .send({
+      title: 'Dummy',
+      price: 10,
+    });
+
+  const orderId = new mongoose.Types.ObjectId().toHexString();
+  const ticket = await Ticket.findById(response.body.id);
+  ticket!.set({ orderId });
+  await ticket!.save();
+
+  //Update
+  await request(app)
+    .put(`/api/tickets/${response.body.id}`)
+    .set('Cookie', cookie) //same Cookie is used to make and upadate ticket
+    .send({
+      title: 'Title Updated',
+      price: 100,
+    })
+    .expect(400);
 });

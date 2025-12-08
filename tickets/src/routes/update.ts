@@ -6,7 +6,10 @@ import {
   NotFoundError,
   requireAuth,
   NotAuthorizedError,
+  BadRequestError,
 } from '@dulinatickets/common';
+import { TicketUpdatedPublisher } from '../events/publishers/ticket-updated-publisher';
+import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 
@@ -29,6 +32,11 @@ router.put(
       throw new NotFoundError();
     }
 
+    //Check if the ticket is reserved
+    if (ticket.orderId) {
+      throw new BadRequestError('Cannot update a reserved Ticket'); //Cannot edit a reserved ticket
+    }
+
     //Check the request userId and ticket's userID equal
     //If yes -> Allow modify
     //If not throw a not authorozed error
@@ -44,6 +52,16 @@ router.put(
 
     //Save to mongodb database
     await ticket.save();
+    console.log('Updated ticket:', ticket);
+
+    //Publish an event saying that a ticket was updated
+    await new TicketUpdatedPublisher(natsWrapper.client).publish({
+      id: ticket.id,
+      title: ticket.title,
+      price: ticket.price,
+      userId: ticket.userId,
+      version: ticket.version,
+    });
 
     res.send(ticket);
   }
