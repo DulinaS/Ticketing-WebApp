@@ -19,6 +19,11 @@ export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent
     if (!order) {
       throw new Error('Order not found');
     }
+    //If the order is already complete, do not cancel it
+    if (order.status === OrderStatus.Complete) {
+      return msg.ack();
+    }
+    //Mark the order as cancelled
     order.set({ status: OrderStatus.Cancelled });
 
     await order.save(); //This will increment the version number
