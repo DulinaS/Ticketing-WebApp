@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { Order } from '../../models/order';
 import { OrderStatus } from '@dulinatickets/common';
 import { stripe } from '../../stripe';
+import { Payment } from '../../models/payment';
 
 it('returns a 404 when purchasing an order that does not exist', async () => {
   await request(app)
@@ -86,4 +87,43 @@ it('returns a 201 with valid inputs', async () => {
   });
 
   expect(stripeCharge).toBeDefined();
+});
+
+it('returns a 201 and creates a payment record', async () => {
+  const userId = new mongoose.Types.ObjectId().toHexString();
+
+  const price = Math.floor(Math.random() * 100000); //Random price for the order
+
+  const order = Order.build({
+    id: new mongoose.Types.ObjectId().toHexString(),
+    userId: userId,
+    version: 0,
+    price,
+    status: OrderStatus.Created,
+  });
+  await order.save();
+
+  await request(app)
+    .post('/api/payments')
+    .set('Cookie', global.signin(userId))
+    .send({
+      token: 'tok_visa',
+      orderId: order.id,
+    })
+    .expect(201);
+
+  //Get the list of charges created during the test
+  const charges = await stripe.charges.list({ limit: 50 });
+  const stripeCharge = charges.data.find((charge) => {
+    return charge.amount === price * 100;
+  });
+
+  expect(stripeCharge).toBeDefined();
+
+  const payment = await Payment.findOne({
+    orderId: order.id,
+    stripeId: stripeCharge!.id,
+  });
+
+  expect(payment).not.toBeNull();
 });
