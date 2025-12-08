@@ -12,7 +12,7 @@ import jwt from 'jsonwebtoken';
 import { Session } from 'inspector';
 //Tell typescript there is a global property called signin()
 declare global {
-  var signin: () => string[];
+  var signin: (id?: string) => string[];
 }
 
 let mongo: any;
@@ -52,10 +52,10 @@ afterAll(async () => {
 }, 50000);
 
 //Faking the authorization
-global.signin = () => {
+global.signin = (id?: string) => {
   //Build a JWT payload {id,email}
   const payload = {
-    id: new mongoose.Types.ObjectId().toHexString(), //random user id everytime when global.signin used
+    id: id || new mongoose.Types.ObjectId().toHexString(), //random user id everytime when global.signin used
     email: 'test@test.com',
   };
 
