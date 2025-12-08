@@ -10,6 +10,14 @@ spec:
     - host: ticketing.dev
       http:
         paths: #Array of Paths - When incoming request comes it goes sequencially below
+          - path: /api/payments/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: payments-srv
+                port:
+                  number: 3000
+
           - path: /api/users/?(.*)
             pathType: ImplementationSpecific
             backend:
