@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Router from 'next/router';
 import useRequest from '../../hooks/use-request';
 
 const newTicket = () => {
@@ -14,7 +15,7 @@ const newTicket = () => {
       title,
       price,
     },
-    onSuccess: (ticket) => console.log(ticket),
+    onSuccess: () => Router.push('/'), //Redirect to homepage on success
   });
 
   //This is called when the form is submitted
