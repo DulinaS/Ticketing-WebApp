@@ -12,7 +12,7 @@ const OrderShow = ({ order, currentUser }) => {
     body: {
       orderId: order.id,
     },
-    onSuccess: (psyment) => console.log(payment),
+    onSuccess: () => Router.push('/orders'), //On successful payment, redirect to orders page
   });
 
   //This effect will run once when the component is mounted
