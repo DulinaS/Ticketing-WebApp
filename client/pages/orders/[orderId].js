@@ -1,7 +1,19 @@
 import { useEffect, useState } from 'react';
+import StripeCheckout from 'react-stripe-checkout';
+import useRequest from '../../hooks/use-request';
 
-const OrderShow = ({ order }) => {
+const OrderShow = ({ order, currentUser }) => {
   const [timeLeft, setTimeLeft] = useState(0);
+
+  //Custom hook to make payment request
+  const { doRequest, errors } = useRequest({
+    url: '/api/payments',
+    method: 'post',
+    body: {
+      orderId: order.id,
+    },
+    onSuccess: (psyment) => console.log(payment),
+  });
 
   //This effect will run once when the component is mounted
   useEffect(() => {
@@ -32,8 +44,13 @@ const OrderShow = ({ order }) => {
       <p>Ticket: {order.ticket.title}</p>
       <p>Price: {order.ticket.price}</p>
       <p>Time left to pay: {timeLeft} seconds</p>
-
-      <button className="btn btn-primary">Pay Now</button>
+      <StripeCheckout
+        token={({ id }) => doRequest({ token: id })} //When payment is successful, call doRequest with the token ID
+        stripeKey="pk_test_51Sc7r7A722iCwuWL24LZcLayv3xxFJxB0VTzdaoaBmRAAiQrX9boGMUE0boEjFVT6bgyPeg2K8cVkM27HNqRP0gn008euaMJb7"
+        amount={order.ticket.price * 100} //Amount in cents
+        email={currentUser.email}
+      />
+      {errors}
     </div>
   );
 };
