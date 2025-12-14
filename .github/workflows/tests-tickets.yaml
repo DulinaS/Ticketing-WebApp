@@ -8,5 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: cd tickets && npm install && npm run test:ci
+      - run: | 
+          cd common && npm install && npm run build
+      - run: 
+          cd orders && npm install && npm run test:ci
+          
+
       
