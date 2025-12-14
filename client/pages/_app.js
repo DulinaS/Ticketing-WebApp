@@ -2,14 +2,21 @@ import 'bootstrap/dist/css/bootstrap.css';
 import buildClient from '../api/build-client';
 import Header from '../components/header';
 
+//This AppComponent is a top level component that wraps all other components
+//It allows us to do things like persisting state or add a header/footer that shows on all pages
 const AppComponent = ({ Component, pageProps, currentUser }) => {
   return (
     <div>
       <Header currentUser={currentUser} />
-      <Component {...pageProps} />
+
+      <div className="container">
+        <Component currentUser={currentUser} {...pageProps} />
+      </div>
     </div>
   );
 };
+//pageProps is what's returned from individual pages' getInitialProps
+//What it does is it allows us to run some code before any page is rendered
 
 //fetch data during SSR
 AppComponent.getInitialProps = async (appContext) => {
@@ -21,7 +28,11 @@ AppComponent.getInitialProps = async (appContext) => {
   //ex: Landing page
   let pageProps = {};
   if (appContext.Component.getInitialProps) {
-    pageProps = await appContext.Component.getInitialProps(appContext.ctx);
+    pageProps = await appContext.Component.getInitialProps(
+      appContext.ctx,
+      client,
+      data.currentUser
+    );
   }
 
   /* //console.log(pageProps);
