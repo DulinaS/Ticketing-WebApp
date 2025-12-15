@@ -1,6 +1,6 @@
 {
   "name": "@dulinatickets/common",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -8,7 +8,7 @@
     "build/**/*"
   ],
   "scripts": {
-    "clean": "del /q build\\*",
+    "clean": "del-cli build/*",
     "build": "npm run clean && tsc",
     "pub": "npm version patch && npm run build && npm publish"
   },

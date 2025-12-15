@@ -7,6 +7,8 @@ import { OrderCancelledListener } from './events/listeners/order-cancelled-liste
 //This is the function that will start the application and connect to the MongoDB database
 //We are using mongoose to connect to the MongoDB database
 const start = async () => {
+  console.log('Starting up Tickets Service....');
+
   //This is where we check if the JWT_KEY is defined
   if (!process.env.JWT_KEY) {
     throw new Error('JWT_KEY must be defined'); //We throw an error if the JWT_KEY is not defined
