@@ -1,3 +1,4 @@
+/* import Link from 'next/link';
 const OrderIndex = ({ orders }) => {
   const orderList = orders.map((order) => {
     return (
@@ -22,7 +23,7 @@ const OrderIndex = ({ orders }) => {
   });
 
   return (
-    <div>
+    <div className="container">
       <h1>Your Orders</h1>
       <table className="table">
         <thead>
@@ -42,4 +43,49 @@ OrderIndex.getInitialProps = async (context, client, currentUser) => {
   const { data } = await client.get('/api/orders');
   return { orders: data };
 };
+export default OrderIndex;
+
+ */
+
+import Link from 'next/link';
+
+const OrderIndex = ({ orders }) => {
+  const orderList = orders.map((order) => {
+    return (
+      <tr key={order.id}>
+        <td>{order.id}</td>
+        <td>{order.ticket.title}</td>
+        <td>{order.ticket.price}</td>
+        <td>
+          <Link href="/tickets/[ticketId]" as={`/tickets/${order.ticket.id}`}>
+            View Ticket
+          </Link>
+        </td>
+      </tr>
+    );
+  });
+
+  return (
+    <div>
+      <h1>Your Orders</h1>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Ticket</th>
+            <th>Price</th>
+            <th>Link</th>
+          </tr>
+        </thead>
+        <tbody>{orderList}</tbody>
+      </table>
+    </div>
+  );
+};
+
+OrderIndex.getInitialProps = async (context, client, currentUser) => {
+  const { data } = await client.get('/api/orders');
+  return { orders: data };
+};
+
 export default OrderIndex;

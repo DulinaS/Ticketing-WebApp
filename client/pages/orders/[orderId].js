@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
-import StripeCheckout from 'react-stripe-checkout';
+import Router from 'next/router';
+import dynamic from 'next/dynamic';
 import useRequest from '../../hooks/use-request';
+
+const StripeCheckout = dynamic(
+  () => import('react-stripe-checkout').then((mod) => mod.default),
+  {
+    ssr: false,
+  }
+);
 
 const OrderShow = ({ order, currentUser }) => {
   const [timeLeft, setTimeLeft] = useState(0);
