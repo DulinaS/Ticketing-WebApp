@@ -1,17 +1,18 @@
 name: tests-tickets
 
-on:
+on: 
   pull_request
 
-jobs:
+jobs: 
   build:
-    runs-on: ubuntu-latest
-    steps:
+    runs-on:  ubuntu-latest
+    steps: 
       - uses: actions/checkout@v2
-      - run: | 
-          cd common && npm install && npm run build
-      - run: 
-          cd orders && npm install && npm run test:ci
-          
-
-      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: cd tickets && npm ci
+      - name: Run tests
+        run: cd orders && npm run test:ci
