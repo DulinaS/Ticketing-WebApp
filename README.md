@@ -2,8 +2,6 @@
 
 EventSphere is a **production-style, event-driven microservices ticketing system** designed to demonstrate real-world backend engineering practices. The project is built using **microservices architecture**, **Apache Kafka** for asynchronous communication, **Docker** for containerization, and **Kubernetes** for orchestration.
 
-This project is an enhanced and extended implementation inspired by Stephen Grider’s microservices course, upgraded with **enterprise-grade features** such as Kafka-based messaging, role-based access control, audit logging, notifications, analytics, and observability.
-
 ---
 
 ## 🚀 Key Features
