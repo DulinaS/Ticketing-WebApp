@@ -18,7 +18,7 @@ export default ({ req }) => {
   }
 }; */
 
-import axios from 'axios';
+/* import axios from 'axios';
 
 export default ({ req }) => {
   if (typeof window === 'undefined') {
@@ -34,5 +34,20 @@ export default ({ req }) => {
   }
 
   // Browser
+  return axios.create({ baseURL: '/' });
+}; */
+
+import axios from 'axios';
+
+export default ({ req }) => {
+  if (typeof window === 'undefined') {
+    // We are on server (SSR) - use nginx service in Docker Compose
+    return axios.create({
+      baseURL: 'http://nginx',
+      headers: req?.headers || {},
+    });
+  }
+
+  // Browser - requests go through nginx at ticketing.dev
   return axios.create({ baseURL: '/' });
 };
