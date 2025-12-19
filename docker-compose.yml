@@ -1,0 +1,220 @@
+version: '3.8'
+
+services:
+  # Auth Service
+  auth:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    image: dulina786/auth
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://auth-mongo:27017/auth
+      - JWT_KEY=${JWT_KEY}
+    depends_on:
+      - auth-mongo
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  auth-mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - auth-mongo-data:/data/db
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  # Tickets Service
+  tickets:
+    build:
+      context: ./tickets
+      dockerfile: Dockerfile
+    image: dulina786/tickets
+    ports:
+      - "3001:3000"
+    environment:
+      - NATS_CLIENT_ID=tickets
+      - NATS_URL=nats://nats:4222
+      - NATS_CLUSTER_ID=ticketing
+      - MONGO_URI=mongodb://tickets-mongo:27017/tickets
+      - JWT_KEY=${JWT_KEY}
+    depends_on:
+      - tickets-mongo
+      - nats
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  tickets-mongo:
+    image: mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - tickets-mongo-data:/data/db
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  # Orders Service
+  orders:
+    build:
+      context: ./orders
+      dockerfile: Dockerfile
+    image: dulina786/orders
+    ports:
+      - "3002:3000"
+    environment:
+      - NATS_CLIENT_ID=orders
+      - NATS_URL=nats://nats:4222
+      - NATS_CLUSTER_ID=ticketing
+      - MONGO_URI=mongodb://orders-mongo:27017/orders
+      - JWT_KEY=${JWT_KEY}
+    depends_on:
+      - orders-mongo
+      - nats
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  orders-mongo:
+    image: mongo
+    ports:
+      - "27019:27017"
+    volumes:
+      - orders-mongo-data:/data/db
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  # Payments Service
+  payments:
+    build:
+      context: ./payments
+      dockerfile: Dockerfile
+    image: dulina786/payments
+    ports:
+      - "3003:3000"
+    environment:
+      - NATS_CLIENT_ID=payments
+      - NATS_URL=nats://nats:4222
+      - NATS_CLUSTER_ID=ticketing
+      - MONGO_URI=mongodb://payments-mongo:27017/payments
+      - JWT_KEY=${JWT_KEY}
+      - STRIPE_KEY=${STRIPE_KEY}
+    depends_on:
+      - payments-mongo
+      - nats
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  payments-mongo:
+    image: mongo
+    ports:
+      - "27020:27017"
+    volumes:
+      - payments-mongo-data:/data/db
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  # Expiration Service
+  expiration:
+    build:
+      context: ./expiration
+      dockerfile: Dockerfile
+    image: dulina786/expiration
+    environment:
+      - NATS_CLIENT_ID=expiration
+      - NATS_URL=nats://nats:4222
+      - NATS_CLUSTER_ID=ticketing
+      - REDIS_HOST=expiration-redis
+    depends_on:
+      - expiration-redis
+      - nats
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  expiration-redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - expiration-redis-data:/data
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  # Client Service
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: dulina786/client
+    ports:
+      - "3004:3000"
+    environment:
+      - JWT_KEY=${JWT_KEY}
+      - NEXT_PUBLIC_STRIPE_KEY=${NEXT_PUBLIC_STRIPE_KEY}
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  # NATS Streaming Server
+  nats:
+    image: nats-streaming:0.17.0
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command:
+      [
+        '-p',
+        '4222',
+        '-m',
+        '8222',
+        '-hbi',
+        '5s',
+        '-hbt',
+        '5s',
+        '-hbf',
+        '2',
+        '-SD',
+        '-cid',
+        'ticketing',
+      ]
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth
+      - tickets
+      - orders
+      - payments
+      - client
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+networks:
+  ticketing-network:
+    driver: bridge
+
+volumes:
+  auth-mongo-data:
+  tickets-mongo-data:
+  orders-mongo-data:
+  payments-mongo-data:
+  expiration-redis-data:

@@ -21,7 +21,7 @@ app.use(json());
 app.use(
   cookieSession({
     signed: false, //This means that the cookie will not be signed
-    secure: process.env.NODE_ENV !== 'test', //If environment is 'test' ---> secure = false otherwise secure :true
+    secure: false, //Set to false for local development with HTTP
   })
 );
 //This middleware checks the whether user is logged in and inspects their JWT token
