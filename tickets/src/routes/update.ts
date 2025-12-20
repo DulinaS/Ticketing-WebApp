@@ -8,9 +8,7 @@ import {
   NotAuthorizedError,
   BadRequestError,
 } from '@dulinatickets/common';
-import { TicketUpdatedPublisher } from '../events/publishers/ticket-updated-publisher';
 import { TicketUpdatedPublisherKafka } from '../events/publishers/ticket-updated-publisher-kafka';
-import { natsWrapper } from '../nats-wrapper';
 import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
@@ -65,10 +63,7 @@ router.put(
       version: ticket.version,
     };
 
-    //Publish to NATS (old system - will be removed after full migration)
-    await new TicketUpdatedPublisher(natsWrapper.client).publish(eventData);
-
-    //Publish to Kafka (new system)
+    //Publish to Kafka
     await new TicketUpdatedPublisherKafka(kafkaWrapper.producer).publish(
       eventData
     );

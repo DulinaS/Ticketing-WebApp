@@ -2,6 +2,7 @@ import request from 'supertest';
 import { app } from '../../app';
 import mongoose from 'mongoose';
 import { natsWrapper } from '../../nats-wrapper';
+import { kafkaWrapper } from '../../kafka-wrapper';
 import { Ticket } from '../../models/tickets';
 
 it('returns a 404 if the provided id does not exist', async () => {
@@ -136,7 +137,7 @@ it('publishes an event', async () => {
     })
     .expect(200);
 
-  expect(natsWrapper.client.publish).toHaveBeenCalled();
+  expect(kafkaWrapper.producer.send).toHaveBeenCalled();
 });
 
 it('rejects updates if the ticket is reserved', async () => {

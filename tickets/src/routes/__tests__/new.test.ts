@@ -2,6 +2,7 @@ import request from 'supertest';
 import { app } from '../../app';
 import { Ticket } from '../../models/tickets';
 import { natsWrapper } from '../../nats-wrapper';
+import { kafkaWrapper } from '../../kafka-wrapper';
 
 it('has a route handler listening to /api/tickets for post requests', async () => {
   const response = await request(app).post('/api/tickets').send({});
@@ -94,5 +95,5 @@ it('publishes an event', async () => {
     })
     .expect(201);
 
-  expect(natsWrapper.client.publish).toHaveBeenCalled();
+  expect(kafkaWrapper.producer.send).toHaveBeenCalled();
 });

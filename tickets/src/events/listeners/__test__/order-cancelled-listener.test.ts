@@ -4,14 +4,17 @@ import {
   OrderStatus,
 } from '@dulinatickets/common';
 import { Ticket } from '../../../models/tickets';
-import { natsWrapper } from '../../../nats-wrapper';
+import { kafkaWrapper } from '../../../kafka-wrapper';
 import mongoose from 'mongoose';
 import { OrderCancelledListener } from '../order-cancelled-listener';
+import { OrderCancelledListenerKafka } from '../order-cancelled-listener-kafka';
 
 //Setup function to create test environment
 const setup = async () => {
   //Create an instance of the listener
-  const listener = new OrderCancelledListener(natsWrapper.client);
+  const listener = new OrderCancelledListenerKafka(
+    await kafkaWrapper.createConsumer('test-group')
+  );
 
   //Setup orderID
   const orderId = new mongoose.Types.ObjectId().toHexString();
@@ -39,28 +42,21 @@ const setup = async () => {
     },
   };
 
-  //fake msg object
-  // @ts-ignore
-  const msg: Message = {
-    ack: jest.fn(),
-  };
-
-  return { listener, ticket, data, msg, orderId };
+  return { listener, ticket, data, orderId };
 };
 
 it('updates the ticket, publishes an event, and acks the message', async () => {
-  const { listener, ticket, data, msg, orderId } = await setup();
+  const { listener, ticket, data, orderId } = await setup();
 
-  //Call the onMessage function with the data object + message object
-  await listener.onMessage(data, msg); //Removes the orderId from the ticket and saves it
+  //Call the onMessage function with the data object + offset + partition
+  await listener.onMessage(data, '0', 0); //Removes the orderId from the ticket and saves it
 
   //Retrieve the updated ticket
   const updatedTicket = await Ticket.findById(ticket.id);
 
   //Write assertions to make sure the ticket was updated;
   expect(updatedTicket!.orderId).not.toBeDefined(); //orderId should be undefined after cancellation
-  expect(msg.ack).toHaveBeenCalled(); //ack should be called
 
   //Ensure a ticket updated event was published
-  expect(natsWrapper.client.publish).toHaveBeenCalled();
+  expect(kafkaWrapper.producer.send).toHaveBeenCalled();
 });

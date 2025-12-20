@@ -4,9 +4,7 @@ import { body } from 'express-validator';
 import { requireAuth } from '@dulinatickets/common';
 import { validateRequest } from '@dulinatickets/common';
 import { Ticket } from '../models/tickets';
-import { TicketCreatedPublisher } from '../events/publishers/ticket-created-publisher';
 import { TicketCreatedPublisherKafka } from '../events/publishers/ticket-created-publisher-kafka';
-import { natsWrapper } from '../nats-wrapper';
 import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
@@ -43,10 +41,7 @@ router.post(
       version: ticket.version,
     };
 
-    //Publish to NATS (old system - will be removed after full migration)
-    await new TicketCreatedPublisher(natsWrapper.client).publish(eventData);
-
-    //Publish to Kafka (new system)
+    //Publish to Kafka
     await new TicketCreatedPublisherKafka(kafkaWrapper.producer).publish(
       eventData
     );

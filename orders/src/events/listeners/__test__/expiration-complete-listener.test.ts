@@ -1,4 +1,5 @@
 import { natsWrapper } from '../../../nats-wrapper';
+import { kafkaWrapper } from '../../../kafka-wrapper';
 import { ExpirationCompleteListener } from '../expiration-complete-listener';
 import { Order } from '../../../models/order';
 import { Ticket } from '../../../models/ticket';
@@ -57,11 +58,11 @@ it('emits an OrderCancelled event', async () => {
 
   await listener.onMessage(data, msg);
 
-  expect(natsWrapper.client.publish).toHaveBeenCalled();
+  expect(kafkaWrapper.producer.send).toHaveBeenCalled();
 
   //This is to check the data of the event published
   const eventData = JSON.parse(
-    (natsWrapper.client.publish as jest.Mock).mock.calls[0][1]
+    (kafkaWrapper.producer.send as jest.Mock).mock.calls[0][0].messages[0].value
   );
   //This is to make sure that the id of the order cancelled event matches the id of the order we created
   expect(eventData.id).toEqual(order.id);
