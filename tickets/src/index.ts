@@ -4,6 +4,8 @@ import { natsWrapper } from './nats-wrapper';
 import { kafkaWrapper } from './kafka-wrapper';
 import { OrderCreatedListener } from './events/listeners/order-created-listener';
 import { OrderCancelledListener } from './events/listeners/order-cancelled-listener';
+import { OrderCreatedListenerKafka } from './events/listeners/order-created-listener-kafka';
+import { OrderCancelledListenerKafka } from './events/listeners/order-cancelled-listener-kafka';
 
 //This is the function that will start the application and connect to the MongoDB database
 //We are using mongoose to connect to the MongoDB database
@@ -78,10 +80,52 @@ const start = async () => {
       'order-cancelled',
     ]);
 
-    //Listen for OrderCreated events (still using NATS for now)
-    new OrderCreatedListener(natsWrapper.client).listen();
-    //Listen for OrderCancelled events (still using NATS for now)
-    new OrderCancelledListener(natsWrapper.client).listen();
+    //Create Kafka consumer for tickets service
+    const consumer = await kafkaWrapper.createConsumer('tickets-service');
+
+    //Subscribe to all topics at once (Kafka requires this before starting consumer)
+    await consumer.subscribe({
+      topics: ['order-created', 'order-cancelled'],
+      fromBeginning: false,
+    });
+    console.log('Subscribed to Kafka topics: order-created, order-cancelled');
+
+    //Create listeners
+    const orderCreatedListenerKafka = new OrderCreatedListenerKafka(consumer);
+    const orderCancelledListenerKafka = new OrderCancelledListenerKafka(
+      consumer
+    );
+
+    //Start consumer and route messages to appropriate listeners
+    await consumer.run({
+      eachMessage: async ({ topic, partition, message }) => {
+        console.log(
+          `Message received: ${topic} / tickets-service / Partition: ${partition} / Offset: ${message.offset}`
+        );
+
+        const parsedData = JSON.parse(message.value!.toString('utf8'));
+
+        // Route to appropriate listener based on topic
+        if (topic === 'order-created') {
+          await orderCreatedListenerKafka.onMessage(
+            parsedData,
+            message.offset,
+            partition
+          );
+        } else if (topic === 'order-cancelled') {
+          await orderCancelledListenerKafka.onMessage(
+            parsedData,
+            message.offset,
+            partition
+          );
+        }
+      },
+    });
+
+    //Listen for OrderCreated events (OLD - NATS - will remove after full migration)
+    // new OrderCreatedListener(natsWrapper.client).listen();
+    //Listen for OrderCancelled events (OLD - NATS - will remove after full migration)
+    // new OrderCancelledListener(natsWrapper.client).listen();
 
     //Connect to MongoDB database - MONGO_URI is defined in k8s tickets-depl.yaml
     await mongoose.connect(process.env.MONGO_URI!);

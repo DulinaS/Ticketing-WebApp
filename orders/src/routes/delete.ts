@@ -7,7 +7,9 @@ import {
 import express, { Request, Response } from 'express';
 import { Order } from '../models/order';
 import { OrderCancelledPublisher } from '../events/publishers/order-cancelled-publisher';
+import { OrderCancelledPublisherKafka } from '../events/publishers/order-cancelled-publisher-kafka';
 import { natsWrapper } from '../nats-wrapper';
+import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
 
@@ -27,14 +29,22 @@ router.delete(
     order.status = OrderStatus.Cancelled;
     await order.save();
 
-    //Publish an event saying that an order was cancelled
-    await new OrderCancelledPublisher(natsWrapper.client).publish({
+    //Prepare event data
+    const eventData = {
       id: order.id,
       version: order.version,
       ticket: {
         id: order.ticket.id,
       },
-    });
+    };
+
+    //Publish to NATS (old system - will remove after full migration)
+    await new OrderCancelledPublisher(natsWrapper.client).publish(eventData);
+
+    //Publish to Kafka (new system)
+    await new OrderCancelledPublisherKafka(kafkaWrapper.producer).publish(
+      eventData
+    );
 
     res.status(204).send(order);
   }

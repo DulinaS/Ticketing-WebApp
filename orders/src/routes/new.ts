@@ -11,7 +11,9 @@ import { body } from 'express-validator';
 import { Ticket } from '../models/ticket';
 import { Order } from '../models/order';
 import { OrderCreatedPublisher } from '../events/publishers/order-created-publisher';
+import { OrderCreatedPublisherKafka } from '../events/publishers/order-created-publisher-kafka';
 import { natsWrapper } from '../nats-wrapper';
+import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
 
@@ -55,8 +57,8 @@ router.post(
     });
     await order.save();
 
-    //Publish an event saying that an order was created
-    await new OrderCreatedPublisher(natsWrapper.client).publish({
+    //Prepare event data
+    const eventData = {
       id: order.id,
       version: order.version,
       status: order.status,
@@ -66,7 +68,15 @@ router.post(
         id: ticket.id,
         price: ticket.price,
       },
-    });
+    };
+
+    //Publish to NATS (old system - will remove after full migration)
+    await new OrderCreatedPublisher(natsWrapper.client).publish(eventData);
+
+    //Publish to Kafka (new system)
+    await new OrderCreatedPublisherKafka(kafkaWrapper.producer).publish(
+      eventData
+    );
 
     //Return the order to the client
     res.status(201).send(order);

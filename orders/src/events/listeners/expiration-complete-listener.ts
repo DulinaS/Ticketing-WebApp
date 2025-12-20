@@ -8,6 +8,8 @@ import { queueGroupName } from './queue-group-name';
 import { Message } from 'node-nats-streaming';
 import { Order } from '../../models/order';
 import { OrderCancelledPublisher } from '../publishers/order-cancelled-publisher';
+import { OrderCancelledPublisherKafka } from '../publishers/order-cancelled-publisher-kafka';
+import { kafkaWrapper } from '../../kafka-wrapper';
 
 export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent> {
   subject: Subjects.ExpirationComplete = Subjects.ExpirationComplete;
@@ -28,14 +30,22 @@ export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent
 
     await order.save(); //This will increment the version number
 
-    //publish an event saying that the order was cancelled
-    await new OrderCancelledPublisher(this.client).publish({
+    const eventData = {
       id: order.id,
       version: order.version,
       ticket: {
         id: order.ticket.toString(),
       },
-    });
+    };
+
+    //Publish to NATS (OLD - will remove after full migration)
+    await new OrderCancelledPublisher(this.client).publish(eventData);
+
+    //Publish to Kafka (NEW)
+    await new OrderCancelledPublisherKafka(kafkaWrapper.producer).publish(
+      eventData
+    );
+    console.log('Order cancelled due to expiration - published to Kafka');
 
     //Acknowledging the message
     msg.ack();
