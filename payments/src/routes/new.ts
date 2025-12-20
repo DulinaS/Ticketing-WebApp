@@ -66,9 +66,6 @@ router.post(
       stripeId: payment.stripeId,
     };
 
-    //Publish to NATS (OLD - will remove after full migration)
-    await new PaymentCreatedPublisher(natsWrapper.client).publish(eventData);
-
     //Publish to Kafka (NEW)
     await new PaymentCreatedPublisherKafka(kafkaWrapper.producer).publish(
       eventData

@@ -3,9 +3,13 @@ import { Order, OrderStatus } from '../../../models/order';
 import { natsWrapper } from '../../../nats-wrapper';
 import { OrderCancelledListener } from '../order-cancelled-listener';
 import { OrderCancelledEvent } from '@dulinatickets/common';
+import { OrderCancelledListenerKafka } from '../order-cancelled-listener-kafka';
+import { kafkaWrapper } from '../../../kafka-wrapper';
 
 const setup = async () => {
-  const listener = new OrderCancelledListener(natsWrapper.client);
+  const listener = new OrderCancelledListenerKafka(
+    await kafkaWrapper.createConsumer('test-group')
+  );
 
   //Create fake order
   const order = Order.build({
@@ -27,30 +31,16 @@ const setup = async () => {
     },
   };
 
-  // @ts-ignore
-  const msg: Message = {
-    ack: jest.fn(),
-  };
-
-  return { listener, order, data, msg };
+  return { listener, order, data };
 };
 
 it('updates the order status to cancelled', async () => {
-  const { listener, order, data, msg } = await setup();
+  const { listener, order, data } = await setup();
 
   //Set the order status to cancelled
-  await listener.onMessage(data, msg);
+  await listener.onMessage(data, '0', 0);
 
   const updatedOrder = await Order.findById(order.id);
 
   expect(updatedOrder!.status).toEqual(OrderStatus.Cancelled);
-});
-
-it('acks the message', async () => {
-  const { listener, order, data, msg } = await setup();
-
-  //Set the order status to cancelled
-  await listener.onMessage(data, msg);
-
-  expect(msg.ack).toHaveBeenCalled();
 });
