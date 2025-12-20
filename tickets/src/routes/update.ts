@@ -9,7 +9,9 @@ import {
   BadRequestError,
 } from '@dulinatickets/common';
 import { TicketUpdatedPublisher } from '../events/publishers/ticket-updated-publisher';
+import { TicketUpdatedPublisherKafka } from '../events/publishers/ticket-updated-publisher-kafka';
 import { natsWrapper } from '../nats-wrapper';
+import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
 
@@ -54,14 +56,20 @@ router.put(
     await ticket.save();
     console.log('Updated ticket:', ticket);
 
-    //Publish an event saying that a ticket was updated
-    await new TicketUpdatedPublisher(natsWrapper.client).publish({
+    //Prepare event data
+    const eventData = {
       id: ticket.id,
       title: ticket.title,
       price: ticket.price,
       userId: ticket.userId,
       version: ticket.version,
-    });
+    };
+
+    //Publish to NATS (old system - will be removed after full migration)
+    await new TicketUpdatedPublisher(natsWrapper.client).publish(eventData);
+
+    //Publish to Kafka (new system)
+    await new TicketUpdatedPublisherKafka(kafkaWrapper.producer).publish(eventData);
 
     res.send(ticket);
   }

@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
 import { app } from './app'; //import app declatration
 import { natsWrapper } from './nats-wrapper';
+import { kafkaWrapper } from './kafka-wrapper';
 import { TicketCreatedListener } from './events/listeners/ticket-created-listener';
+import { TicketCreatedListenerKafka } from './events/listeners/ticket-created-listener-kafka';
 import { TicketUpdatedListener } from './events/listeners/ticket-updated-listener';
 import { ExpirationCompleteListener } from './events/listeners/expiration-complete-listener';
 import { PaymentCreatedListener } from './events/listeners/payment-created-listener';
@@ -30,9 +32,17 @@ const start = async () => {
   if (!process.env.NATS_URL) {
     throw new Error('NATS_URL must be defined');
   }
+  //This is where we check if the KAFKA_BROKERS is defined
+  if (!process.env.KAFKA_BROKERS) {
+    throw new Error('KAFKA_BROKERS must be defined');
+  }
+  //This is where we check if the KAFKA_CLIENT_ID is defined
+  if (!process.env.KAFKA_CLIENT_ID) {
+    throw new Error('KAFKA_CLIENT_ID must be defined');
+  }
 
   try {
-    //Connect to NATS server
+    //Connect to NATS server (keeping during migration)
     await natsWrapper.connect(
       process.env.NATS_CLUSTER_ID,
       process.env.NATS_CLIENT_ID,
@@ -47,13 +57,45 @@ const start = async () => {
     process.on('SIGINT', () => natsWrapper.client.close());
     process.on('SIGTERM', () => natsWrapper.client.close());
 
-    //Listen for TicketCreated events
-    new TicketCreatedListener(natsWrapper.client).listen();
-    //Listen for TicketUpdated events
+    //Connect to Kafka
+    const kafkaBrokers = process.env.KAFKA_BROKERS.split(',');
+    await kafkaWrapper.connect(process.env.KAFKA_CLIENT_ID, kafkaBrokers);
+
+    //Graceful shutdown for Kafka
+    process.on('SIGINT', async () => {
+      await kafkaWrapper.disconnect();
+      process.exit();
+    });
+    process.on('SIGTERM', async () => {
+      await kafkaWrapper.disconnect();
+      process.exit();
+    });
+
+    //Ensure Kafka topics exist
+    await kafkaWrapper.ensureTopics([
+      'ticket-created',
+      'ticket-updated',
+      'order-created',
+      'order-cancelled',
+      'expiration-complete',
+      'payment-created',
+    ]);
+
+    //Create Kafka consumer for orders service
+    const consumer = await kafkaWrapper.createConsumer('orders-service');
+
+    //Listen for ticket:created events from Kafka (NEW)
+    const ticketCreatedListenerKafka = new TicketCreatedListenerKafka(consumer);
+    await ticketCreatedListenerKafka.listen();
+
+    //Listen for TicketCreated events from NATS (OLD - will remove after full migration)
+    // new TicketCreatedListener(natsWrapper.client).listen();
+    
+    //Listen for TicketUpdated events (still using NATS)
     new TicketUpdatedListener(natsWrapper.client).listen();
-    //Listen for ExpirationComplete events
+    //Listen for ExpirationComplete events (still using NATS)
     new ExpirationCompleteListener(natsWrapper.client).listen();
-    //Listen for PaymentCreated events
+    //Listen for PaymentCreated events (still using NATS)
     new PaymentCreatedListener(natsWrapper.client).listen();
 
     //Connect to MongoDB database - MONGO_URI is defined in k8s tickets-depl.yaml
