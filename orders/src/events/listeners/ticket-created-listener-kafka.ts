@@ -1,10 +1,14 @@
-import { TicketCreatedEvent, KafkaListener, Subjects } from '@dulinatickets/common';
+import {
+  TicketCreatedEvent,
+  KafkaListener,
+  Subjects,
+} from '@dulinatickets/common';
 import { queueGroupName } from './queue-group-name';
 import { Ticket } from '../../models/ticket';
 
 /**
  * Kafka Listener for Ticket Created Events
- * 
+ *
  * This replaces the NATS TicketCreatedListener
  * Key differences:
  * - Uses KafkaListener base class instead of Listener

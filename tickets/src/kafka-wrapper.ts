@@ -3,7 +3,7 @@ import { Kafka, Producer, Consumer, Admin } from 'kafkajs';
 /**
  * Kafka Wrapper - Manages Kafka connections for the service
  * Similar to NatsWrapper but for Kafka
- * 
+ *
  * Key differences from NATS:
  * - Kafka uses topics (similar to NATS subjects)
  * - Kafka uses consumer groups (similar to NATS queue groups)
@@ -122,7 +122,9 @@ class KafkaWrapper {
     }
 
     const existingTopics = await this._admin.listTopics();
-    const topicsToCreate = topics.filter((topic) => !existingTopics.includes(topic));
+    const topicsToCreate = topics.filter(
+      (topic) => !existingTopics.includes(topic)
+    );
 
     if (topicsToCreate.length > 0) {
       await this._admin.createTopics({
@@ -143,12 +145,12 @@ class KafkaWrapper {
     if (this._producer) {
       await this._producer.disconnect();
     }
-    
+
     for (const [groupId, consumer] of this._consumers) {
       await consumer.disconnect();
       console.log(`Disconnected consumer for group: ${groupId}`);
     }
-    
+
     if (this._admin) {
       await this._admin.disconnect();
     }

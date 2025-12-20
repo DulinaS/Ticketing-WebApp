@@ -47,7 +47,9 @@ router.post(
     await new TicketCreatedPublisher(natsWrapper.client).publish(eventData);
 
     //Publish to Kafka (new system)
-    await new TicketCreatedPublisherKafka(kafkaWrapper.producer).publish(eventData);
+    await new TicketCreatedPublisherKafka(kafkaWrapper.producer).publish(
+      eventData
+    );
 
     res.status(201).send(ticket); //201 is the status code for created
   }

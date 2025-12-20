@@ -90,7 +90,7 @@ const start = async () => {
 
     //Listen for TicketCreated events from NATS (OLD - will remove after full migration)
     // new TicketCreatedListener(natsWrapper.client).listen();
-    
+
     //Listen for TicketUpdated events (still using NATS)
     new TicketUpdatedListener(natsWrapper.client).listen();
     //Listen for ExpirationComplete events (still using NATS)

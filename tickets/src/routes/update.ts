@@ -69,7 +69,9 @@ router.put(
     await new TicketUpdatedPublisher(natsWrapper.client).publish(eventData);
 
     //Publish to Kafka (new system)
-    await new TicketUpdatedPublisherKafka(kafkaWrapper.producer).publish(eventData);
+    await new TicketUpdatedPublisherKafka(kafkaWrapper.producer).publish(
+      eventData
+    );
 
     res.send(ticket);
   }

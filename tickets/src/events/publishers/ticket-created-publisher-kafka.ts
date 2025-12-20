@@ -1,11 +1,15 @@
-import { KafkaPublisher, Subjects, TicketCreatedEvent } from '@dulinatickets/common';
+import {
+  KafkaPublisher,
+  Subjects,
+  TicketCreatedEvent,
+} from '@dulinatickets/common';
 
 /**
  * Kafka Publisher for Ticket Created Event
- * 
+ *
  * This replaces the NATS TicketCreatedPublisher
  * Key difference: Uses KafkaPublisher base class instead of Publisher
- * 
+ *
  * Usage:
  * const publisher = new TicketCreatedPublisherKafka(kafkaWrapper.producer);
  * await publisher.publish({ id, title, price, userId, version });

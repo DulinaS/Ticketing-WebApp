@@ -12,7 +12,7 @@ interface Event {
 
 /**
  * Kafka Publisher Base Class
- * 
+ *
  * Key differences from NATS Publisher:
  * - Uses Kafka Producer instead of NATS Stan
  * - Messages are sent to topics (instead of subjects)

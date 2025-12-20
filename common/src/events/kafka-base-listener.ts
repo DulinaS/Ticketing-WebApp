@@ -11,7 +11,7 @@ interface Event {
 
 /**
  * Kafka Listener Base Class
- * 
+ *
  * Key differences from NATS Listener:
  * - Uses Kafka Consumer instead of NATS Stan
  * - Consumer groups work similarly to NATS queue groups
@@ -22,7 +22,11 @@ interface Event {
 export abstract class KafkaListener<T extends Event> {
   abstract subject: T['subject']; // Topic to subscribe to
   abstract queueGroupName: string; // Consumer group name
-  abstract onMessage(data: T['data'], offset: string, partition: number): Promise<void>; // Message handler
+  abstract onMessage(
+    data: T['data'],
+    offset: string,
+    partition: number
+  ): Promise<void>; // Message handler
 
   protected consumer: Consumer; // Kafka consumer instance
 
@@ -48,7 +52,9 @@ export abstract class KafkaListener<T extends Event> {
           fromBeginning: false, // Set to true to read all historical messages
         });
 
-        console.log(`Subscribed to Kafka topic: ${this.subject} with group: ${this.queueGroupName}`);
+        console.log(
+          `Subscribed to Kafka topic: ${this.subject} with group: ${this.queueGroupName}`
+        );
 
         // Run the consumer
         await this.consumer.run({
@@ -85,7 +91,10 @@ export abstract class KafkaListener<T extends Event> {
         break;
       } catch (error: any) {
         // Check if error is retriable (topic doesn't exist yet)
-        if (error.type === 'UNKNOWN_TOPIC_OR_PARTITION' && retries < maxRetries - 1) {
+        if (
+          error.type === 'UNKNOWN_TOPIC_OR_PARTITION' &&
+          retries < maxRetries - 1
+        ) {
           retries++;
           const delay = 2000 * retries; // Exponential backoff: 2s, 4s, 6s, 8s
           console.log(
