@@ -9,6 +9,7 @@ import { TicketUpdatedListenerKafka } from './events/listeners/ticket-updated-li
 import { ExpirationCompleteListener } from './events/listeners/expiration-complete-listener';
 import { ExpirationCompleteListenerKafka } from './events/listeners/expiration-complete-listener-kafka';
 import { PaymentCreatedListener } from './events/listeners/payment-created-listener';
+import { PaymentCreatedListenerKafka } from './events/listeners/payment-created-listener-kafka';
 
 //This is the function that will start the application and connect to the MongoDB database
 //We are using mongoose to connect to the MongoDB database
@@ -88,17 +89,25 @@ const start = async () => {
 
     //Subscribe to all topics at once (Kafka requires this before starting consumer)
     await consumer.subscribe({
-      topics: ['ticket-created', 'ticket-updated', 'expiration-complete'],
+      topics: [
+        'ticket-created',
+        'ticket-updated',
+        'expiration-complete',
+        'payment-created',
+      ],
       fromBeginning: false,
     });
     console.log(
-      'Subscribed to Kafka topics: ticket-created, ticket-updated, expiration-complete'
+      'Subscribed to Kafka topics: ticket-created, ticket-updated, expiration-complete, payment-created'
     );
 
     //Create listeners
     const ticketCreatedListenerKafka = new TicketCreatedListenerKafka(consumer);
     const ticketUpdatedListenerKafka = new TicketUpdatedListenerKafka(consumer);
     const expirationCompleteListenerKafka = new ExpirationCompleteListenerKafka(
+      consumer
+    );
+    const paymentCreatedListenerKafka = new PaymentCreatedListenerKafka(
       consumer
     );
 
@@ -130,20 +139,27 @@ const start = async () => {
             message.offset,
             partition
           );
+        } else if (topic === 'payment-created') {
+          await paymentCreatedListenerKafka.onMessage(
+            parsedData,
+            message.offset,
+            partition
+          );
         }
       },
     });
 
-    //Listen for TicketCreated events from NOLD - NATS - will remove after full migration)
-    // // new TicketCreatedListener(natsWrapper.client).listen();
+    //Listen for TicketCreated events from NATS (OLD - will remove after full migration)
+    // new TicketCreatedListener(natsWrapper.client).listen();
 
     //Listen for TicketUpdated events from NATS (OLD - will remove after full migration)
     // new TicketUpdatedListener(natsWrapper.client).listen();
 
-    //Listen for ExpirationComplete events (still using NATS)
-    new ExpirationCompleteListener(natsWrapper.client).listen();
-    //Listen for PaymentCreated events (still using NATS)
-    new PaymentCreatedListener(natsWrapper.client).listen();
+    //Listen for ExpirationComplete events (OLD - NATS - will remove after full migration)
+    // new ExpirationCompleteListener(natsWrapper.client).listen();
+
+    //Listen for PaymentCreated events (OLD - NATS - will remove after full migration)
+    // new PaymentCreatedListener(natsWrapper.client).listen();
 
     //Connect to MongoDB database - MONGO_URI is defined in k8s tickets-depl.yaml
     await mongoose.connect(process.env.MONGO_URI!);
