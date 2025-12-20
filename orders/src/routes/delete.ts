@@ -38,9 +38,6 @@ router.delete(
       },
     };
 
-    //Publish to NATS (old system - will remove after full migration)
-    await new OrderCancelledPublisher(natsWrapper.client).publish(eventData);
-
     //Publish to Kafka (new system)
     await new OrderCancelledPublisherKafka(kafkaWrapper.producer).publish(
       eventData

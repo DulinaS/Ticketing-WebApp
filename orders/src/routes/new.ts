@@ -70,9 +70,6 @@ router.post(
       },
     };
 
-    //Publish to NATS (old system - will remove after full migration)
-    await new OrderCreatedPublisher(natsWrapper.client).publish(eventData);
-
     //Publish to Kafka (new system)
     await new OrderCreatedPublisherKafka(kafkaWrapper.producer).publish(
       eventData

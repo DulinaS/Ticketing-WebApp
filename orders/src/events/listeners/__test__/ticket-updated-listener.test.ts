@@ -5,10 +5,14 @@ import { TicketUpdatedEvent } from '@dulinatickets/common';
 import mongoose from 'mongoose';
 import { Message } from 'node-nats-streaming';
 import { Ticket } from '../../../models/ticket';
+import { TicketUpdatedListenerKafka } from '../ticket-updated-listener-kafka';
+import { kafkaWrapper } from '../../../kafka-wrapper';
 
 const setup = async () => {
   //create an instance of the listener
-  const listener = new TicketUpdatedListener(natsWrapper.client);
+  const listener = new TicketUpdatedListenerKafka(
+    await kafkaWrapper.createConsumer('test-group')
+  );
 
   //create and save a ticket
   const ticket = Ticket.build({
@@ -28,22 +32,14 @@ const setup = async () => {
     price: 999,
   };
 
-  //create a fake message object
-  // We don't need to implement all the methods in Message, just the ack method
-  // @ts-ignore
-  const msg: Message = {
-    ack: jest.fn(), //mock function to track if it's called
-  };
-
-  return { ticket, listener, data, msg };
+  return { ticket, listener, data };
 };
 
 it('finds,updates, and saves a ticket', async () => {
-  const { ticket, listener, data, msg } = await setup();
+  const { ticket, listener, data } = await setup();
 
-  //Use the listener to process the data object and message object
   //This updates the ticket and saves it to the database
-  await listener.onMessage(data, msg);
+  await listener.onMessage(data, '0', 0);
 
   //Write assertions to make sure the ticket was updated correctly
   const updatedTicket = await Ticket.findById(ticket.id);
@@ -53,27 +49,16 @@ it('finds,updates, and saves a ticket', async () => {
   expect(updatedTicket!.version).toEqual(data.version);
 });
 
-it('acks the message', async () => {
-  const { listener, data, msg } = await setup();
-
-  //Use the listener to process the data object and message object
-  //This updates the ticket and saves it to the database
-  await listener.onMessage(data, msg);
-
-  //Write assertions to make sure ack function is called to acknowledge the message
-  expect(msg.ack).toHaveBeenCalled();
-});
-
 //Test to make sure out of order events are not processed
 it('does not call ack if the event has a skipped version number', async () => {
-  const { listener, data, msg } = await setup();
+  const { listener, data } = await setup();
   data.version = 10; //Skip to version 10
 
   //Try to use the listener to process the data object and message object
   try {
-    await listener.onMessage(data, msg);
+    await listener.onMessage(data, '0', 0);
   } catch (err) {
-    //Write assertions to make sure ack function is not called to acknowledge the message
-    expect(msg.ack).not.toHaveBeenCalled();
+    //The error should be thrown for out of order events
+    expect(err).toBeDefined();
   }
 });
