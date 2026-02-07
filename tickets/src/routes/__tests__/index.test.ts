@@ -2,23 +2,27 @@ import request from 'supertest';
 import { app } from '../../app';
 
 //To get the tickets first they have to be created
-const createTicket = () => {
+const createTicket = (title: string, price: number) => {
   return request(app).post('/api/tickets').set('Cookie', global.signin()).send({
-    title: 'Dummy1',
-    price: 10,
+    title,
+    price,
   });
 };
 
-//To get all tickets doesnt need to be authenticated
-it('can fetch a list of tickets', async () => {
-  //await key word is used to give time to create the ticket
-  await createTicket();
-  await createTicket();
-  await createTicket();
+describe('VIEW ALL TICKETS - Test Cases', () => {
+  it('TC_TKT_006: View list of all available (non-reserved) tickets', async () => {
+    console.log('\n--- TC_TKT_006: View all available tickets ---');
 
-  const response = await request(app).get('/api/tickets').send().expect(200);
+    await createTicket('Concert Ticket', 50);
+    await createTicket('Movie Ticket', 15);
+    await createTicket('Sports Event', 75);
+    console.log('Created 3 tickets');
 
-  //Asume a array is returned that has the tickets we check the content of the response
+    const response = await request(app).get('/api/tickets').send().expect(200);
 
-  expect(response.body.length).toEqual(3);
+    console.log('Response: 200 OK');
+    console.log('Tickets found:', response.body.length);
+    expect(response.body.length).toEqual(3);
+    console.log('✅ PASSED\n');
+  });
 });
