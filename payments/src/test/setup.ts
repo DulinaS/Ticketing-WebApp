@@ -18,12 +18,10 @@ declare global {
 let mongo: any;
 
 //JEST will see we're trying to mock the real file
-//Instead of the real file it will use nats-wrapper.ts in __mock__ directory
+//Instead of the real file it will use the mock files in __mock__ directory
 jest.mock('../nats-wrapper');
+jest.mock('../stripe');
 //---------------------------------
-
-process.env.STRIPE_KEY =
-  'sk_test_51Sc7r7A722iCwuWLvwB25UT5tk5LG1nxVeof897JQOhvK5Bb1oKgPEYngmyIHayl8hOJ3NNptQ55NRde2LRM7kBD00akscs8pm';
 
 //Runs before all tests run in
 beforeAll(async () => {
