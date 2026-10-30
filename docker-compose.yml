@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Auth Service
   auth:
@@ -138,8 +136,6 @@ services:
 
   expiration-redis:
     image: redis
-    ports:
-      - "6379:6379"
     volumes:
       - expiration-redis-data:/data
     restart: unless-stopped
