@@ -5,14 +5,16 @@
 - [x] Stop tracking `node_modules`
 - [x] Fix GitHub Actions trigger syntax so test workflows run
 - [ ] Roll the Stripe test secret key in the Stripe dashboard (old key is in git history)
-- [ ] Untrack `.env` on `migration/kafka` (`git rm --cached .env`)
+- [x] Untrack `.env` on `migration/kafka`
 
 ## 2. Finish the Kafka migration
-- [ ] Merge `migration/kafka` with the cleanup branch (keep `node_modules` deleted)
-- [ ] Remove NATS: wrappers, old listeners/publishers, `nats-test/`, NATS server, NATS env vars
-- [ ] Publish events with a partition key (ticket/order id) so updates stay in order
-- [ ] Review `fromBeginning: false` so events published before a consumer group exists aren't lost
-- [ ] Add Kafka to the Kubernetes manifests (`infra/k8s`) and skaffold
+- [x] Merge `main` into `migration/kafka` (keep `node_modules` deleted)
+- [x] Remove NATS from services: wrappers, old listeners/publishers, `nats-test/`, NATS server, NATS env vars
+- [x] Publish events with a partition key (ticket id, or order id for expiration/payment events)
+- [x] Use `fromBeginning: true` so events published before a consumer group exists aren't lost
+- [x] Add Kafka to the Kubernetes manifests (`infra/k8s/kafka-depl.yaml`)
+- [ ] Remove NATS from `common` (`base-listener`, `base-publisher`, `node-nats-streaming`) and publish a new version
+- [ ] Optional: drop the `Kafka` suffix from listener/publisher class and file names
 - [ ] Merge into `main`
 
 ## 3. Payment & order bugs
