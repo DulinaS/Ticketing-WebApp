@@ -63,9 +63,10 @@ router.put(
       version: ticket.version,
     };
 
-    //Publish to Kafka
+    //Publish to Kafka, keyed by ticket id
     await new TicketUpdatedPublisherKafka(kafkaWrapper.producer).publish(
-      eventData
+      eventData,
+      ticket.id
     );
 
     res.send(ticket);

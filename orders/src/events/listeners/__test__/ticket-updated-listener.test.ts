@@ -1,9 +1,6 @@
 import request from 'supertest';
-import { TicketUpdatedListener } from '../ticket-updated-listener';
-import { natsWrapper } from '../../../nats-wrapper';
 import { TicketUpdatedEvent } from '@dulinatickets/common';
 import mongoose from 'mongoose';
-import { Message } from 'node-nats-streaming';
 import { Ticket } from '../../../models/ticket';
 import { TicketUpdatedListenerKafka } from '../ticket-updated-listener-kafka';
 import { kafkaWrapper } from '../../../kafka-wrapper';

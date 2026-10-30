@@ -6,7 +6,6 @@ import {
 import { Ticket } from '../../../models/tickets';
 import { kafkaWrapper } from '../../../kafka-wrapper';
 import mongoose from 'mongoose';
-import { OrderCancelledListener } from '../order-cancelled-listener';
 import { OrderCancelledListenerKafka } from '../order-cancelled-listener-kafka';
 
 //Setup function to create test environment

@@ -37,15 +37,18 @@ export class OrderCancelledListenerKafka extends KafkaListener<OrderCancelledEve
     //Save the ticket
     await ticket.save();
 
-    //Publish a ticket updated event to Kafka
-    await new TicketUpdatedPublisherKafka(kafkaWrapper.producer).publish({
-      id: ticket.id,
-      version: ticket.version,
-      title: ticket.title,
-      price: ticket.price,
-      userId: ticket.userId,
-      orderId: ticket.orderId,
-    });
+    //Publish a ticket updated event to Kafka, keyed by ticket id
+    await new TicketUpdatedPublisherKafka(kafkaWrapper.producer).publish(
+      {
+        id: ticket.id,
+        version: ticket.version,
+        title: ticket.title,
+        price: ticket.price,
+        userId: ticket.userId,
+        orderId: ticket.orderId,
+      },
+      ticket.id
+    );
 
     console.log('Ticket unreserved and updated event published to Kafka');
   }

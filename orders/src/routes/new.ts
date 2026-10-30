@@ -10,9 +10,7 @@ import {
 import { body } from 'express-validator';
 import { Ticket } from '../models/ticket';
 import { Order } from '../models/order';
-import { OrderCreatedPublisher } from '../events/publishers/order-created-publisher';
 import { OrderCreatedPublisherKafka } from '../events/publishers/order-created-publisher-kafka';
-import { natsWrapper } from '../nats-wrapper';
 import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
@@ -70,9 +68,10 @@ router.post(
       },
     };
 
-    //Publish to Kafka (new system)
+    //Publish to Kafka, keyed by ticket id
     await new OrderCreatedPublisherKafka(kafkaWrapper.producer).publish(
-      eventData
+      eventData,
+      ticket.id
     );
 
     //Return the order to the client

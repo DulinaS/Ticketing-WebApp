@@ -1,7 +1,5 @@
 import mongoose from 'mongoose';
 import { Order, OrderStatus } from '../../../models/order';
-import { natsWrapper } from '../../../nats-wrapper';
-import { OrderCancelledListener } from '../order-cancelled-listener';
 import { OrderCancelledEvent } from '@dulinatickets/common';
 import { OrderCancelledListenerKafka } from '../order-cancelled-listener-kafka';
 import { kafkaWrapper } from '../../../kafka-wrapper';

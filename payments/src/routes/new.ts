@@ -12,9 +12,7 @@ import {
 import { Order } from '../models/order';
 import { stripe } from '../stripe';
 import { Payment } from '../models/payment';
-import { PaymentCreatedPublisher } from '../events/publishers/payment-created-publisher';
 import { PaymentCreatedPublisherKafka } from '../events/publishers/payment-created-publisher-kafka';
-import { natsWrapper } from '../nats-wrapper';
 import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
@@ -66,9 +64,10 @@ router.post(
       stripeId: payment.stripeId,
     };
 
-    //Publish to Kafka (NEW)
+    //Publish to Kafka, keyed by order id
     await new PaymentCreatedPublisherKafka(kafkaWrapper.producer).publish(
-      eventData
+      eventData,
+      payment.orderId
     );
     console.log('Payment created event published to Kafka');
 

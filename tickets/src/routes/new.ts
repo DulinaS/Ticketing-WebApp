@@ -41,9 +41,10 @@ router.post(
       version: ticket.version,
     };
 
-    //Publish to Kafka
+    //Publish to Kafka, keyed by ticket id
     await new TicketCreatedPublisherKafka(kafkaWrapper.producer).publish(
-      eventData
+      eventData,
+      ticket.id
     );
 
     res.status(201).send(ticket); //201 is the status code for created

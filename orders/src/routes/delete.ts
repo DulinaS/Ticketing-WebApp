@@ -6,9 +6,7 @@ import {
 } from '@dulinatickets/common';
 import express, { Request, Response } from 'express';
 import { Order } from '../models/order';
-import { OrderCancelledPublisher } from '../events/publishers/order-cancelled-publisher';
 import { OrderCancelledPublisherKafka } from '../events/publishers/order-cancelled-publisher-kafka';
-import { natsWrapper } from '../nats-wrapper';
 import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
@@ -38,9 +36,10 @@ router.delete(
       },
     };
 
-    //Publish to Kafka (new system)
+    //Publish to Kafka, keyed by ticket id
     await new OrderCancelledPublisherKafka(kafkaWrapper.producer).publish(
-      eventData
+      eventData,
+      order.ticket.id
     );
 
     res.status(204).send(order);

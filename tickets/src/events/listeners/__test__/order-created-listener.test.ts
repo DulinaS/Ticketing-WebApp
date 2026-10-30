@@ -1,6 +1,5 @@
 import request from 'supertest';
 import { kafkaWrapper } from '../../../kafka-wrapper';
-import { OrderCreatedListener } from '../order-created-listener';
 import { Ticket } from '../../../models/tickets';
 import { OrderCreatedEvent, OrderStatus } from '@dulinatickets/common';
 import mongoose from 'mongoose';
@@ -34,7 +33,7 @@ const setup = async () => {
     },
   };
 
-  //fake msg object (Kafka doesn't need ack like NATS)
+  //fake msg object
   const msg = {
     ack: jest.fn(),
   };

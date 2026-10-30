@@ -1,9 +1,6 @@
 import { OrderCreatedEvent, OrderStatus } from '@dulinatickets/common';
 import { Order } from '../../../models/order';
 import mongoose from 'mongoose';
-import { OrderCreatedListener } from '../order-created-listener';
-import { natsWrapper } from '../../../nats-wrapper';
-import { Message } from 'node-nats-streaming';
 import { OrderCreatedListenerKafka } from '../order-created-listener-kafka';
 import { kafkaWrapper } from '../../../kafka-wrapper';
 

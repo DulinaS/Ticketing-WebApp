@@ -1,9 +1,6 @@
 import request from 'supertest';
-import { TicketCreatedListener } from '../ticket-created-listener';
-import { natsWrapper } from '../../../nats-wrapper'; //mocked natsWrapper
 import { TicketCreatedEvent } from '@dulinatickets/common';
 import mongoose from 'mongoose';
-import { Message } from 'node-nats-streaming';
 import { Ticket } from '../../../models/ticket';
 import { TicketCreatedListenerKafka } from '../ticket-created-listener-kafka';
 import { kafkaWrapper } from '../../../kafka-wrapper';

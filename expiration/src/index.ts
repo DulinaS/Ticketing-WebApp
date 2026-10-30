@@ -1,23 +1,9 @@
-import { natsWrapper } from './nats-wrapper';
 import { kafkaWrapper } from './kafka-wrapper';
-import { OrderCreatedListener } from './events/listeners/order-created-listener';
 import { OrderCreatedListenerKafka } from './events/listeners/order-created-listener-kafka';
 
 //This is the function that will start the application and connect to the MongoDB database
 //We are using mongoose to connect to the MongoDB database
 const start = async () => {
-  //This is where we check if the NATS_CLUSTER_ID is defined
-  if (!process.env.NATS_CLUSTER_ID) {
-    throw new Error('NATS_CLUSTER_ID must be defined');
-  }
-  //This is where we check if the NATS_CLIENT_ID is defined
-  if (!process.env.NATS_CLIENT_ID) {
-    throw new Error('NATS_CLIENT_ID must be defined');
-  }
-  //This is where we check if the NATS_URL is defined
-  if (!process.env.NATS_URL) {
-    throw new Error('NATS_URL must be defined');
-  }
   //This is where we check if the KAFKA_BROKERS is defined
   if (!process.env.KAFKA_BROKERS) {
     throw new Error('KAFKA_BROKERS must be defined');
@@ -28,13 +14,6 @@ const start = async () => {
   }
 
   try {
-    //Connect to NATS server
-    await natsWrapper.connect(
-      process.env.NATS_CLUSTER_ID,
-      process.env.NATS_CLIENT_ID,
-      process.env.NATS_URL
-    );
-
     //Connect to Kafka
     const kafkaBrokers = process.env.KAFKA_BROKERS.split(',');
     await kafkaWrapper.connect(process.env.KAFKA_CLIENT_ID, kafkaBrokers);
@@ -58,7 +37,7 @@ const start = async () => {
     //Subscribe to order-created topic
     await consumer.subscribe({
       topics: ['order-created'],
-      fromBeginning: false,
+      fromBeginning: true, //Read missed events on first start of the consumer group
     });
     console.log('Subscribed to Kafka topic: order-created');
 
@@ -83,17 +62,6 @@ const start = async () => {
         }
       },
     });
-
-    //Listen for OrderCreated events from NATS (OLD - will remove after full migration)
-    // //Graceful shutdown for NATS connection
-    natsWrapper.client.on('close', () => {
-      console.log('NATS connection closed!');
-      process.exit();
-    });
-    process.on('SIGINT', () => natsWrapper.client.close());
-    process.on('SIGTERM', () => natsWrapper.client.close());
-
-    new OrderCreatedListener(natsWrapper.client).listen();
   } catch (err) {
     console.error(err);
   }

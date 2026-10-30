@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { app } from '../../app';
 import { Ticket } from '../../models/tickets';
-import { natsWrapper } from '../../nats-wrapper';
 import { kafkaWrapper } from '../../kafka-wrapper';
 
 describe('CREATE TICKET - Test Cases', () => {
@@ -109,5 +108,20 @@ describe('CREATE TICKET - Test Cases', () => {
       .expect(201);
 
     expect(kafkaWrapper.producer.send).toHaveBeenCalled();
+  });
+
+  it('keys the published event by ticket id', async () => {
+    const response = await request(app)
+      .post('/api/tickets')
+      .set('Cookie', global.signin())
+      .send({
+        title: 'validTitle',
+        price: 10,
+      })
+      .expect(201);
+
+    const message = (kafkaWrapper.producer.send as jest.Mock).mock.calls[0][0]
+      .messages[0];
+    expect(message.key).toEqual(response.body.id);
   });
 });

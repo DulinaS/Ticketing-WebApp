@@ -37,15 +37,18 @@ export class OrderCreatedListenerKafka extends KafkaListener<OrderCreatedEvent> 
     //Save the ticket
     await ticket.save(); //This will also increment the version number
 
-    //Publish a ticket updated event to Kafka
-    await new TicketUpdatedPublisherKafka(kafkaWrapper.producer).publish({
-      id: ticket.id,
-      version: ticket.version,
-      title: ticket.title,
-      price: ticket.price,
-      userId: ticket.userId,
-      orderId: ticket.orderId,
-    });
+    //Publish a ticket updated event to Kafka, keyed by ticket id
+    await new TicketUpdatedPublisherKafka(kafkaWrapper.producer).publish(
+      {
+        id: ticket.id,
+        version: ticket.version,
+        title: ticket.title,
+        price: ticket.price,
+        userId: ticket.userId,
+        orderId: ticket.orderId,
+      },
+      ticket.id
+    );
 
     console.log('Ticket reserved and updated event published to Kafka');
   }

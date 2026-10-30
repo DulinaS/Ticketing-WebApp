@@ -41,14 +41,17 @@ export class ExpirationCompleteListenerKafka extends KafkaListener<ExpirationCom
     order.set({ status: OrderStatus.Cancelled });
     await order.save();
 
-    //Publish an event saying that the order was cancelled
-    await new OrderCancelledPublisherKafka(kafkaWrapper.producer).publish({
-      id: order.id,
-      version: order.version,
-      ticket: {
-        id: order.ticket.id,
+    //Publish an event saying that the order was cancelled, keyed by ticket id
+    await new OrderCancelledPublisherKafka(kafkaWrapper.producer).publish(
+      {
+        id: order.id,
+        version: order.version,
+        ticket: {
+          id: order.ticket.id,
+        },
       },
-    });
+      order.ticket.id
+    );
 
     console.log('Order cancelled due to expiration - published to Kafka');
   }

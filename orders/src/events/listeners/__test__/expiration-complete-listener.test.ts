@@ -1,11 +1,8 @@
-import { natsWrapper } from '../../../nats-wrapper';
 import { kafkaWrapper } from '../../../kafka-wrapper';
-import { ExpirationCompleteListener } from '../expiration-complete-listener';
 import { Order } from '../../../models/order';
 import { Ticket } from '../../../models/ticket';
 import { ExpirationCompleteEvent, OrderStatus } from '@dulinatickets/common';
 import mongoose from 'mongoose';
-import { Message } from 'node-nats-streaming';
 import { ExpirationCompleteListenerKafka } from '../expiration-complete-listener-kafka';
 
 const setup = async () => {
