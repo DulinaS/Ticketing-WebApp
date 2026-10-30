@@ -17,14 +17,12 @@ spec:
         - name: payments
           image: dulina786/payments
           env:
-            - name: NATS_CLIENT_ID
+            - name: KAFKA_CLIENT_ID
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: NATS_URL
-              value: 'nats://nats-srv:4222'
-            - name: NATS_CLUSTER_ID
-              value: 'ticketing'
+            - name: KAFKA_BROKERS
+              value: 'kafka-srv:9092'
             - name: MONGO_URI
               value: mongodb://payments-mongo-srv:27017/payments
             - name: JWT_KEY

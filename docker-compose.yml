@@ -37,16 +37,12 @@ services:
     ports:
       - "3001:3000"
     environment:
-      - NATS_CLIENT_ID=tickets
-      - NATS_URL=nats://nats:4222
-      - NATS_CLUSTER_ID=ticketing
       - KAFKA_BROKERS=kafka:9092
       - KAFKA_CLIENT_ID=tickets
       - MONGO_URI=mongodb://tickets-mongo:27017/tickets
       - JWT_KEY=${JWT_KEY}
     depends_on:
       - tickets-mongo
-      - nats
       - kafka
     restart: unless-stopped
     networks:
@@ -71,16 +67,12 @@ services:
     ports:
       - "3002:3000"
     environment:
-      - NATS_CLIENT_ID=orders
-      - NATS_URL=nats://nats:4222
-      - NATS_CLUSTER_ID=ticketing
       - KAFKA_BROKERS=kafka:9092
       - KAFKA_CLIENT_ID=orders
       - MONGO_URI=mongodb://orders-mongo:27017/orders
       - JWT_KEY=${JWT_KEY}
     depends_on:
       - orders-mongo
-      - nats
       - kafka
     restart: unless-stopped
     networks:
@@ -105,9 +97,6 @@ services:
     ports:
       - "3003:3000"
     environment:
-      - NATS_CLIENT_ID=payments
-      - NATS_URL=nats://nats:4222
-      - NATS_CLUSTER_ID=ticketing
       - KAFKA_BROKERS=kafka:9092
       - KAFKA_CLIENT_ID=payments
       - MONGO_URI=mongodb://payments-mongo:27017/payments
@@ -115,7 +104,6 @@ services:
       - STRIPE_KEY=${STRIPE_KEY}
     depends_on:
       - payments-mongo
-      - nats
       - kafka
     restart: unless-stopped
     networks:
@@ -138,15 +126,11 @@ services:
       dockerfile: Dockerfile
     image: dulina786/expiration
     environment:
-      - NATS_CLIENT_ID=expiration
-      - NATS_URL=nats://nats:4222
-      - NATS_CLUSTER_ID=ticketing
       - KAFKA_BROKERS=kafka:9092
       - KAFKA_CLIENT_ID=expiration
       - REDIS_HOST=expiration-redis
     depends_on:
       - expiration-redis
-      - nats
       - kafka
     restart: unless-stopped
     networks:
@@ -177,32 +161,6 @@ services:
     networks:
       - ticketing-network
 
-  # NATS Streaming Server (keeping during migration)
-  nats:
-    image: nats-streaming:0.17.0
-    ports:
-      - "4222:4222"
-      - "8222:8222"
-    command:
-      [
-        '-p',
-        '4222',
-        '-m',
-        '8222',
-        '-hbi',
-        '5s',
-        '-hbt',
-        '5s',
-        '-hbf',
-        '2',
-        '-SD',
-        '-cid',
-        'ticketing',
-      ]
-    restart: unless-stopped
-    networks:
-      - ticketing-network
-
   # Apache Kafka Broker (KRaft mode - no Zookeeper needed)
   kafka:
     image: apache/kafka:3.7.0
@@ -224,7 +182,8 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 3
       # Cluster ID for KRaft
-      CLUSTER_ID: 'TicketingKafkaCluster123456'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk' # must be a 22-char base64 UUID
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
       - kafka-data:/var/lib/kafka/data
     restart: unless-stopped
