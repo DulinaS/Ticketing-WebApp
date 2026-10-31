@@ -40,8 +40,10 @@ services:
       - MONGO_URI=mongodb://tickets-mongo:27017/tickets
       - JWT_KEY=${JWT_KEY}
     depends_on:
-      - tickets-mongo
-      - kafka
+      tickets-mongo:
+        condition: service_started
+      kafka:
+        condition: service_healthy #Wait until Kafka accepts connections
     restart: unless-stopped
     networks:
       - ticketing-network
@@ -70,8 +72,10 @@ services:
       - MONGO_URI=mongodb://orders-mongo:27017/orders
       - JWT_KEY=${JWT_KEY}
     depends_on:
-      - orders-mongo
-      - kafka
+      orders-mongo:
+        condition: service_started
+      kafka:
+        condition: service_healthy #Wait until Kafka accepts connections
     restart: unless-stopped
     networks:
       - ticketing-network
@@ -101,8 +105,10 @@ services:
       - JWT_KEY=${JWT_KEY}
       - STRIPE_KEY=${STRIPE_KEY}
     depends_on:
-      - payments-mongo
-      - kafka
+      payments-mongo:
+        condition: service_started
+      kafka:
+        condition: service_healthy #Wait until Kafka accepts connections
     restart: unless-stopped
     networks:
       - ticketing-network
@@ -128,8 +134,10 @@ services:
       - KAFKA_CLIENT_ID=expiration
       - REDIS_HOST=expiration-redis
     depends_on:
-      - expiration-redis
-      - kafka
+      expiration-redis:
+        condition: service_started
+      kafka:
+        condition: service_healthy #Wait until Kafka accepts connections
     restart: unless-stopped
     networks:
       - ticketing-network
@@ -182,6 +190,13 @@ services:
       KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
       - kafka-data:/var/lib/kafka/data
+    #Healthy once the broker answers requests, so services don't start before Kafka is ready
+    healthcheck:
+      test: ['CMD-SHELL', '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1']
+      interval: 10s
+      timeout: 30s #The check starts a small Java tool, which is slow on WSL
+      retries: 10
+      start_period: 90s #Grace period while Kafka starts up
     restart: unless-stopped
     networks:
       - ticketing-network
