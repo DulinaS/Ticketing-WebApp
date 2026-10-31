@@ -12,8 +12,8 @@ import {
 import { Order } from '../models/order';
 import { stripe } from '../stripe';
 import { Payment } from '../models/payment';
-import { PaymentCreatedPublisher } from '../events/publishers/payment-created-publisher';
-import { natsWrapper } from '../nats-wrapper';
+import { PaymentCreatedPublisherKafka } from '../events/publishers/payment-created-publisher-kafka';
+import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
 
@@ -58,12 +58,18 @@ router.post(
 
     await payment.save();
 
-    //Afte creating the payment, we can publish an event saying that a payment was created
-    await new PaymentCreatedPublisher(natsWrapper.client).publish({
+    const eventData = {
       id: payment.id,
       orderId: payment.orderId,
       stripeId: payment.stripeId,
-    });
+    };
+
+    //Publish to Kafka, keyed by order id
+    await new PaymentCreatedPublisherKafka(kafkaWrapper.producer).publish(
+      eventData,
+      payment.orderId
+    );
+    console.log('Payment created event published to Kafka');
 
     res.status(201).send({ id: payment.id });
   }

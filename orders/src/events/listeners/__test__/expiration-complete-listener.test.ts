@@ -1,13 +1,14 @@
-import { natsWrapper } from '../../../nats-wrapper';
-import { ExpirationCompleteListener } from '../expiration-complete-listener';
+import { kafkaWrapper } from '../../../kafka-wrapper';
 import { Order } from '../../../models/order';
 import { Ticket } from '../../../models/ticket';
 import { ExpirationCompleteEvent, OrderStatus } from '@dulinatickets/common';
 import mongoose from 'mongoose';
-import { Message } from 'node-nats-streaming';
+import { ExpirationCompleteListenerKafka } from '../expiration-complete-listener-kafka';
 
 const setup = async () => {
-  const listener = new ExpirationCompleteListener(natsWrapper.client);
+  const listener = new ExpirationCompleteListenerKafka(
+    await kafkaWrapper.createConsumer('test-group')
+  );
 
   //Create a ticket
   const ticket = Ticket.build({
@@ -33,19 +34,13 @@ const setup = async () => {
     orderId: order.id,
   };
 
-  //Create msg objetc
-  // @ts-ignore
-  const msg: Message = {
-    ack: jest.fn(),
-  };
-
-  return { listener, order, ticket, data, msg };
+  return { listener, order, ticket, data };
 };
 
 it('updates the order status to cancelled', async () => {
-  const { listener, order, ticket, data, msg } = await setup();
+  const { listener, order, ticket, data } = await setup();
 
-  await listener.onMessage(data, msg);
+  await listener.onMessage(data, '0', 0);
 
   const updatedOrder = await Order.findById(order.id);
 
@@ -53,24 +48,16 @@ it('updates the order status to cancelled', async () => {
 });
 
 it('emits an OrderCancelled event', async () => {
-  const { listener, order, ticket, data, msg } = await setup();
+  const { listener, order, ticket, data } = await setup();
 
-  await listener.onMessage(data, msg);
+  await listener.onMessage(data, '0', 0);
 
-  expect(natsWrapper.client.publish).toHaveBeenCalled();
+  expect(kafkaWrapper.producer.send).toHaveBeenCalled();
 
   //This is to check the data of the event published
   const eventData = JSON.parse(
-    (natsWrapper.client.publish as jest.Mock).mock.calls[0][1]
+    (kafkaWrapper.producer.send as jest.Mock).mock.calls[0][0].messages[0].value
   );
   //This is to make sure that the id of the order cancelled event matches the id of the order we created
   expect(eventData.id).toEqual(order.id);
-});
-
-it('acks the message', async () => {
-  const { listener, order, ticket, data, msg } = await setup();
-
-  await listener.onMessage(data, msg);
-
-  expect(msg.ack).toHaveBeenCalled();
 });

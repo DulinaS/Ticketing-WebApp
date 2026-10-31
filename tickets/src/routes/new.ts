@@ -4,8 +4,8 @@ import { body } from 'express-validator';
 import { requireAuth } from '@dulinatickets/common';
 import { validateRequest } from '@dulinatickets/common';
 import { Ticket } from '../models/tickets';
-import { TicketCreatedPublisher } from '../events/publishers/ticket-created-publisher';
-import { natsWrapper } from '../nats-wrapper';
+import { TicketCreatedPublisherKafka } from '../events/publishers/ticket-created-publisher-kafka';
+import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
 //requireAuth middleware is applied
@@ -32,14 +32,20 @@ router.post(
     await ticket.save(); //Save the ticket to the database
     console.log('Saved ticket:', ticket);
 
-    //Publish an event saying that a ticket was created
-    await new TicketCreatedPublisher(natsWrapper.client).publish({
+    //Prepare event data
+    const eventData = {
       id: ticket.id,
       title: ticket.title,
       price: ticket.price,
       userId: ticket.userId,
       version: ticket.version,
-    });
+    };
+
+    //Publish to Kafka, keyed by ticket id
+    await new TicketCreatedPublisherKafka(kafkaWrapper.producer).publish(
+      eventData,
+      ticket.id
+    );
 
     res.status(201).send(ticket); //201 is the status code for created
   }

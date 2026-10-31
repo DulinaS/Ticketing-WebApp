@@ -14,6 +14,8 @@ export * from './middlewares/validate-request';
 export * from './events/subjects';
 export * from './events/base-listener';
 export * from './events/base-publisher';
+export * from './events/kafka-base-listener';
+export * from './events/kafka-base-publisher';
 export * from './events/ticket-created-event';
 export * from './events/ticket-updated-event';
 

@@ -3,7 +3,7 @@ import { app } from '../../app';
 import mongoose from 'mongoose';
 import { Ticket } from '../../models/ticket';
 import { Order, OrderStatus } from '../../models/order';
-import { natsWrapper } from '../../nats-wrapper';
+import { kafkaWrapper } from '../../kafka-wrapper';
 
 it('returns an error is the ticket does not exist', async () => {
   const ticketId = new mongoose.Types.ObjectId();
@@ -71,5 +71,10 @@ it('emits an order created event', async () => {
     .send({ ticketId: ticket.id })
     .expect(201);
 
-  expect(natsWrapper.client.publish).toHaveBeenCalled;
+  expect(kafkaWrapper.producer.send).toHaveBeenCalled();
+
+  //Order events are keyed by ticket id so they stay in order per ticket
+  const message = (kafkaWrapper.producer.send as jest.Mock).mock.calls[0][0]
+    .messages[0];
+  expect(message.key).toEqual(ticket.id);
 });

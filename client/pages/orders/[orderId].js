@@ -1,17 +1,11 @@
 import { useEffect, useState } from 'react';
 import Router from 'next/router';
-import dynamic from 'next/dynamic';
+import { loadStripe } from '@stripe/stripe-js';
 import useRequest from '../../hooks/use-request';
-
-const StripeCheckout = dynamic(
-  () => import('react-stripe-checkout').then((mod) => mod.default),
-  {
-    ssr: false,
-  }
-);
 
 const OrderShow = ({ order, currentUser }) => {
   const [timeLeft, setTimeLeft] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   //Custom hook to make payment request
   const { doRequest, errors } = useRequest({
@@ -41,6 +35,22 @@ const OrderShow = ({ order, currentUser }) => {
     };
   }, [order]);
 
+  const handlePayment = async () => {
+    setLoading(true);
+    try {
+      // Use Stripe's test token directly (simulates successful card payment)
+      // In a real app, you would collect card details with Stripe Elements
+      const testToken = 'tok_visa'; // Stripe's test token for Visa
+
+      // Send payment to backend
+      await doRequest({ token: testToken });
+    } catch (err) {
+      console.error(err);
+      alert('Payment failed. Please try again.');
+    }
+    setLoading(false);
+  };
+
   if (timeLeft < 0) {
     return <div>Order Expired</div>;
   }
@@ -50,14 +60,23 @@ const OrderShow = ({ order, currentUser }) => {
       <h1>Order Detail</h1>
       <p>Order ID: {order.id}</p>
       <p>Ticket: {order.ticket.title}</p>
-      <p>Price: {order.ticket.price}</p>
+      <p>Price: ${order.ticket.price}</p>
       <p>Time left to pay: {timeLeft} seconds</p>
-      <StripeCheckout
-        token={({ id }) => doRequest({ token: id })} //When payment is successful, call doRequest with the token ID
-        stripeKey="pk_test_51Sc7r7A722iCwuWL24LZcLayv3xxFJxB0VTzdaoaBmRAAiQrX9boGMUE0boEjFVT6bgyPeg2K8cVkM27HNqRP0gn008euaMJb7"
-        amount={order.ticket.price * 100} //Amount in cents
-        email={currentUser.email}
-      />
+
+      <button
+        className="btn btn-primary"
+        onClick={handlePayment}
+        disabled={loading}
+      >
+        {loading ? 'Processing...' : `Pay $${order.ticket.price}`}
+      </button>
+
+      <div className="mt-3">
+        <small className="text-muted">
+          Test Mode: Click pay to simulate payment with test card
+        </small>
+      </div>
+
       {errors}
     </div>
   );

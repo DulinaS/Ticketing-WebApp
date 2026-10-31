@@ -6,8 +6,8 @@ import {
 } from '@dulinatickets/common';
 import express, { Request, Response } from 'express';
 import { Order } from '../models/order';
-import { OrderCancelledPublisher } from '../events/publishers/order-cancelled-publisher';
-import { natsWrapper } from '../nats-wrapper';
+import { OrderCancelledPublisherKafka } from '../events/publishers/order-cancelled-publisher-kafka';
+import { kafkaWrapper } from '../kafka-wrapper';
 
 const router = express.Router();
 
@@ -27,14 +27,20 @@ router.delete(
     order.status = OrderStatus.Cancelled;
     await order.save();
 
-    //Publish an event saying that an order was cancelled
-    await new OrderCancelledPublisher(natsWrapper.client).publish({
+    //Prepare event data
+    const eventData = {
       id: order.id,
       version: order.version,
       ticket: {
         id: order.ticket.id,
       },
-    });
+    };
+
+    //Publish to Kafka, keyed by ticket id
+    await new OrderCancelledPublisherKafka(kafkaWrapper.producer).publish(
+      eventData,
+      order.ticket.id
+    );
 
     res.status(204).send(order);
   }
